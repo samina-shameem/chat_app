@@ -10,6 +10,8 @@ import Home from './components/pages/Home';
 import NotFoundPage from './components/pages/NotFoundPage';
 import RegisterPage from './components/pages/RegisterPage';
 
+import LoginPage from './components/pages/LoginPage';
+
 function App() {
   return (
     <AuthProvider>
@@ -20,8 +22,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/register" element={<RegisterPage />} />
-          {/* <Route path="/login" element={<LoginPage />} />
-          <Route path="/chat" element={
+          <Route path="/login" element={<LoginPage />} />
+          {/* <Route path="/chat" element={
             <PrivateRoute>
               <ChatPage />
             </PrivateRoute>
@@ -38,5 +40,6 @@ function App() {
     </AuthProvider>
   );
 }
+
 
 export default App;

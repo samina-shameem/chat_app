@@ -8,6 +8,7 @@ import Footer from './components/layout/Footer';
 import SideNav from './components/layout/SideNav';
 import Home from './components/pages/Home';
 import NotFoundPage from './components/pages/NotFoundPage';
+import RegisterPage from './components/pages/RegisterPage';
 
 function App() {
   return (
@@ -18,8 +19,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
-          {/* <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          {/* <Route path="/login" element={<LoginPage />} />
           <Route path="/chat" element={
             <PrivateRoute>
               <ChatPage />

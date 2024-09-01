@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { useChat } from '../hooks/useChat';
-import MessageList from '../components/chat/MessageList';
+import { useChat } from '../context/ChatContext';
+import MessageList from '../chat/MessageList';
 
 function ChatPage() {
     const { messages, fetchMessages, sendMessage, deleteMessage } = useChat();

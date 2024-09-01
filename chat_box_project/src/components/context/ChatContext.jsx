@@ -1,5 +1,5 @@
 import React, { createContext, useState } from 'react';
-import { fetchMessagesService, sendMessageService, deleteMessageService } from '../services/chatService';
+import { fetchMessagesService, sendMessageService, deleteMessageService } from '../../services/chatService';
 
 const ChatContext = createContext();
 

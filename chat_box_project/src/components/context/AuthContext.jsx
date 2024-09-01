@@ -1,23 +1,34 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { loginService, logoutService, registerService, getUserData, updateProfileService, deleteUserService } from '../../services/authService';
-
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const loadUser = async () => {
-            const userData = await getUserData();
-            if (userData) setUser(userData);
+            try {
+                const userData = await getUserData();
+                setUser(userData);
+            } catch (error) {
+                console.error('Failed to load user data', error);
+            } finally {
+                setLoading(false);
+            }
         };
 
         loadUser();
     }, []);
 
     const login = async (username, password) => {
-        const userData = await loginService(username, password);
-        setUser(userData);
+        try {
+            const userData = await loginService(username, password);
+            setUser(userData);
+        } catch (error) {
+            console.error('Login failed', error);
+            throw error;
+        }
     };
 
     const logout = () => {
@@ -26,22 +37,37 @@ export const AuthProvider = ({ children }) => {
     };
 
     const register = async (username, email, password) => {
-        const userData = await registerService(username, email, password);
-        setUser(userData);
+        try {
+            const userData = await registerService(username, email, password);
+            setUser(userData);
+        } catch (error) {
+            console.error('Registration failed', error);
+            throw error;
+        }
     };
 
     const updateProfile = async (data) => {
-        const updatedUser = await updateProfileService(data);
-        setUser(updatedUser);
+        try {
+            const updatedUser = await updateProfileService(data);
+            setUser(updatedUser);
+        } catch (error) {
+            console.error('Failed to update profile', error);
+            throw error;
+        }
     };
 
     const deleteUser = async () => {
-        await deleteUserService();
-        setUser(null);
+        try {
+            await deleteUserService();
+            setUser(null);
+        } catch (error) {
+            console.error('Failed to delete user', error);
+            throw error;
+        }
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, register, updateProfile, deleteUser }}>
+        <AuthContext.Provider value={{ user, login, logout, register, updateProfile, deleteUser, loading }}>
             {children}
         </AuthContext.Provider>
     );

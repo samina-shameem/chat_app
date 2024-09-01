@@ -1,46 +1,20 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-
-function Header() {
-    const { user, logout } = useAuth();
-
+import React from 'react'
+import { Navbar, Nav } from 'react-bootstrap'
+const Header = () => {
     return (
-        <header className="navbar navbar-expand-lg navbar-light bg-light">
-            <div className="container-fluid">
-                <Link className="navbar-brand" to="/">Chat App</Link>
-                <div className="collapse navbar-collapse">
-                    <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/">Home</Link>
-                        </li>
-                        {user ? (
-                            <>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/chat">Chat</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/profile">Profile</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <button className="btn btn-link nav-link" onClick={logout}>Logout</button>
-                                </li>
-                            </>
-                        ) : (
-                            <>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/login">Login</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/register">Register</Link>
-                                </li>
-                            </>
-                        )}
-                    </ul>
-                </div>
-            </div>
-        </header>
-    );
+        <Navbar bg="light" expand="lg">
+            <Navbar.Brand href="/">Chat Box</Navbar.Brand>
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
+                <Nav className="mr-auto">
+                    <Nav.Link href="/home">Home</Nav.Link>
+                    <Nav.Link href="/login">Login</Nav.Link>
+                    <Nav.Link href="/register">Register</Nav.Link>
+                </Nav>
+            </Navbar.Collapse>
+        </Navbar>
+    )
 }
 
-export default Header;
+
+export default Header

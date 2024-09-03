@@ -1,10 +1,11 @@
 import { axiosPrivate } from "../api/axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useAuth from "./useAuth";
+import { fetchCsrfToken, generateToken } from "../api/auth"; // Ensure these functions are correctly defined
 
 const useAxiosPrivate = () => {
   const { auth } = useAuth();
-  const [csrfToken, setcsrfToken] = useState({});
+  const [csrfToken, setCsrfToken] = useState(null);
 
   // List of endpoints that require CSRF token
   const csrfEndpoints = ["/auth/register", "/auth/token"];
@@ -14,24 +15,35 @@ const useAxiosPrivate = () => {
 
   useEffect(() => {
     const requestIntercept = axiosPrivate.interceptors.request.use(
-      (config) => {
+      async (config) => {
         // Add JWT to the Authorization header if required
         if (jwtEndpoints.some((endpoint) => config.url.includes(endpoint))) {
-          if (!config.headers["Authorization"]) {
-            config.headers["Authorization"] = `Bearer ${auth?.accessToken}`;
+          if (auth?.accessToken && !config.headers["Authorization"]) {
+            config.headers["Authorization"] = `Bearer ${auth.accessToken}`;
           }
         }
 
         // Add CSRF token to the request body if required
-    if (csrfEndpoints.some(endpoint => config.url.includes(endpoint))) {        
-        if (!csrfToken) {            
-            setcsrfToken(await fetchCsrfToken());
+        if (csrfEndpoints.some((endpoint) => config.url.includes(endpoint))) {
+          if (!csrfToken) {
+            try {
+              const token = await fetchCsrfToken(); // Ensure fetchCsrfToken is defined elsewhere
+              setCsrfToken(token);
+              config.data = {
+                ...config.data,
+                csrfToken: token,
+              };
+            } catch (error) {
+              console.error("Failed to fetch CSRF token:", error);
+              return Promise.reject(error);
+            }
+          } else {
+            config.data = {
+              ...config.data,
+              csrfToken: csrfToken,
+            };
+          }
         }
-        config.data = {
-            ...config.data,
-            csrfToken: csrfToken,
-        };
-    }
 
         return config;
       },
@@ -42,12 +54,37 @@ const useAxiosPrivate = () => {
       (response) => response,
       async (error) => {
         const prevRequest = error?.config;
-        if (error?.response?.status === 403 && !prevRequest?.sent) {
+
+        // Check for 403 Forbidden errors and handle JWT refresh
+        if (error?.response?.status === 403 && !prevRequest?.sent && jwtEndpoints.some((endpoint) => prevRequest.url.includes(endpoint))) {
           prevRequest.sent = true;
-          const newAccessToken = await generateToken();
-          prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-          return axiosPrivate(prevRequest);
+          try {
+            const newAccessToken = await generateToken(); // Ensure generateToken is defined elsewhere
+            prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+            return axiosPrivate(prevRequest);
+          } catch (tokenError) {
+            console.error("Failed to refresh token:", tokenError);
+            return Promise.reject(tokenError);
+          }
         }
+
+        // Check for 401 Unauthorized errors and handle CSRF token refresh
+        if (error?.response?.status === 401 && !prevRequest?.sent && csrfEndpoints.some((endpoint) => prevRequest.url.includes(endpoint))) {
+          prevRequest.sent = true;
+          try {
+            const newCsrfToken = await fetchCsrfToken(); // Ensure fetchCsrfToken is defined elsewhere
+            setCsrfToken(newCsrfToken);
+            prevRequest.data = {
+              ...prevRequest.data,
+              csrfToken: newCsrfToken,
+            };
+            return axiosPrivate(prevRequest);
+          } catch (csrfError) {
+            console.error("Failed to refresh CSRF token:", csrfError);
+            return Promise.reject(csrfError);
+          }
+        }
+
         return Promise.reject(error);
       }
     );
@@ -56,7 +93,7 @@ const useAxiosPrivate = () => {
       axiosPrivate.interceptors.request.eject(requestIntercept);
       axiosPrivate.interceptors.response.eject(responseIntercept);
     };
-  }, [auth, refresh]);
+  }, [auth, csrfToken]);
 
   return axiosPrivate;
 };

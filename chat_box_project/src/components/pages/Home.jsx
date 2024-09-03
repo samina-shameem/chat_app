@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Link } from 'react-router-dom';
+
 function Home() {
     return (
         <div className="container d-flex align-items-center justify-content-center">
@@ -7,8 +9,8 @@ function Home() {
                 <h1>Welcome to the Chat Box</h1>
                 <p>Please log in or register to start chatting.</p>
                 <div className="mt-3">
-                    <a href="/login" className="btn btn-outline-primary me-2">Login</a>
-                    <a href="/register" className="btn btn-primary">Register</a>
+                    <Link className="btn btn-outline-primary me-2" to="/login">Login</Link>
+                    <Link className="btn btn-primary" to="/register">Register</Link>
                 </div>
             </div>
         </div>

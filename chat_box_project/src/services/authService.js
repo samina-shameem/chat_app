@@ -11,9 +11,35 @@ export const logoutService = () => {
     console.log('User logged out');
 };
 
-export const registerService = async (username, email, password) => {
-    // Mocked registration service
-    return { id: 2, username, email, avatar: '' };
+export const getCsrfToken = async () => {
+    const csrfResponse = await fetch('https://chatify-api.up.railway.app/csrf', {
+        method: 'PATCH'
+    });
+    return await csrfResponse.text();
+};
+
+export const registerService = async (username, password, email, avatar) => {
+    const csrfToken = await getCsrfToken();
+
+    const registerResponse = await fetch('https://chatify-api.up.railway.app/auth/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            username,
+            password,
+            email,
+            avatar,
+            csrfToken
+        })
+    });
+
+    if (!registerResponse.ok) {
+        throw new Error('Registration failed');
+    }
+    const data = await registerResponse.json();
+    return data;
 };
 
 export const getUserData = async () => {

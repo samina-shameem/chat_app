@@ -1,6 +1,8 @@
 import React from 'react';
 import { Form, Button } from 'react-bootstrap';
 
+import { Link } from 'react-router-dom';
+
 const LoginPage = () => {
     const [username, setUsername] = React.useState('');
     const [password, setPassword] = React.useState('');
@@ -47,7 +49,7 @@ const LoginPage = () => {
                     Login
                 </Button>
                 <p className="mt-2">
-                    Not registered yet ? <a href="/register">Register</a>
+                    Not registered yet ? <Link to="/register">Register</Link>
                 </p>
             </Form>
         </div>

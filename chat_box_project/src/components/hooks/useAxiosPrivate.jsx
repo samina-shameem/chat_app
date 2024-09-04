@@ -1,7 +1,7 @@
 import { axiosPrivate } from "../api/axios";
 import { useEffect, useState } from "react";
 import useAuth from "./useAuth";
-import { fetchCsrfToken, generateToken } from "../api/auth"; // Ensure these functions are correctly defined
+import { fetchCsrfToken, generateToken } from "../../services/apiService";
 
 const useAxiosPrivate = () => {
   const { auth } = useAuth();
@@ -27,7 +27,7 @@ const useAxiosPrivate = () => {
         if (csrfEndpoints.some((endpoint) => config.url.includes(endpoint))) {
           if (!csrfToken) {
             try {
-              const token = await fetchCsrfToken(); // Ensure fetchCsrfToken is defined elsewhere
+              const token = await fetchCsrfToken();              
               setCsrfToken(token);
               config.data = {
                 ...config.data,
@@ -59,7 +59,7 @@ const useAxiosPrivate = () => {
         if (error?.response?.status === 403 && !prevRequest?.sent && jwtEndpoints.some((endpoint) => prevRequest.url.includes(endpoint))) {
           prevRequest.sent = true;
           try {
-            const newAccessToken = await generateToken(); // Ensure generateToken is defined elsewhere
+            const newAccessToken = await generateToken();
             prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
             return axiosPrivate(prevRequest);
           } catch (tokenError) {
@@ -72,7 +72,7 @@ const useAxiosPrivate = () => {
         if (error?.response?.status === 401 && !prevRequest?.sent && csrfEndpoints.some((endpoint) => prevRequest.url.includes(endpoint))) {
           prevRequest.sent = true;
           try {
-            const newCsrfToken = await fetchCsrfToken(); // Ensure fetchCsrfToken is defined elsewhere
+            const newCsrfToken = await fetchCsrfToken();
             setCsrfToken(newCsrfToken);
             prevRequest.data = {
               ...prevRequest.data,

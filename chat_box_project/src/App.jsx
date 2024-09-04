@@ -11,6 +11,8 @@ import Unauthorized from './components/pages/Unauthorized';
 
 import RequireAuth from './components/auth/RequireAuth';
 import ChatPage from './components/pages/ChatPage';
+import Dashboard from './components/pages/Dashboard';
+import LogoutButton from './components/pages/LogoutButton';
 
 function App() {
   return (
@@ -20,11 +22,12 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
-        <Route path="unauthorized" element={<Unauthorized />} />        
-
+        <Route path="unauthorized" element={<Unauthorized />} />       
+        
         {/* we want to protect these routes */}
         <Route element={<RequireAuth />}>
           <Route path="/chat" element={<ChatPage />} />        
+          <Route path="/dashboard" element={<Dashboard />} />                  
         </Route>
 
         {/* catch all */}

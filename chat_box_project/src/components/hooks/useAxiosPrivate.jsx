@@ -1,7 +1,6 @@
-import { axiosPrivate } from "../api/axios";
 import { useEffect, useState } from "react";
+import { axiosPrivate } from "../api/axios";
 import useAuth from "./useAuth";
-import { fetchCsrfToken, generateToken } from "../../services/apiService";
 
 const useAxiosPrivate = () => {
   const { auth } = useAuth();
@@ -12,6 +11,37 @@ const useAxiosPrivate = () => {
 
   // List of endpoints that require JWT
   const jwtEndpoints = ["/messages", "/users", "/user"];
+
+  // Function to fetch CSRF token
+  const fetchCsrfToken = async () => {
+    try {
+      const response = await axiosPrivate.patch('/csrf');
+      console.debug('Fetched CSRF token');
+      return response.data.csrfToken; // Assuming response contains csrfToken
+    } catch (error) {
+      console.error('Error fetching CSRF token:', error);
+      throw error;
+    }
+  };
+
+  // Function to generate a new token (for refreshing expired tokens)
+  const generateToken = async () => {
+    if (!auth?.username || !auth?.password) {
+      throw new Error("No username or password found for token generation");
+    }
+
+    const loginData = { username: auth.username, password: auth.password };
+    try {
+      const response = await axiosPrivate.post('/auth/token', loginData);
+      // Assuming the response contains a new token
+      const { token } = response.data;
+      console.info('Generated new token');
+      return token;
+    } catch (error) {
+      console.error('Error refreshing auth token:', error);
+      throw error;
+    }
+  };
 
   useEffect(() => {
     const requestIntercept = axiosPrivate.interceptors.request.use(
@@ -27,7 +57,7 @@ const useAxiosPrivate = () => {
         if (csrfEndpoints.some((endpoint) => config.url.includes(endpoint))) {
           if (!csrfToken) {
             try {
-              const token = await fetchCsrfToken();              
+              const token = await fetchCsrfToken();
               setCsrfToken(token);
               config.data = {
                 ...config.data,

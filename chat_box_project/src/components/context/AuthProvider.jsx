@@ -5,13 +5,15 @@ const AuthContext = createContext({});
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({});
   const login = (authData) => {
+    console.info('Logging in with:', authData);
     setAuth(authData);
   };
 
   const logout = () => {
-    logoutService(); // Clear tokens and any other data
-    setAuth(null); // Reset authentication state
+    console.info('Logging out');
+    setAuth(null);
   };
+
   return (
     <AuthContext.Provider value={{ auth, login, logout }}>
       {children}

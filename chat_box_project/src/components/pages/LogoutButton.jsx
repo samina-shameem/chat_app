@@ -11,7 +11,7 @@ const LogoutButton = () => {
   const handleLogout = () => {
     try {
       logout(); // Call the logout function from context
-      navigate('/login'); // Redirect to login page
+      navigate('/login'); 
     } catch (error) {
       console.error('Logout failed:', error);
       // Handle logout error (e.g., show a message to the user)

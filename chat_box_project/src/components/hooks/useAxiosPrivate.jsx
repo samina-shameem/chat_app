@@ -50,7 +50,7 @@ const useAxiosPrivate = () => {
             console.info("JWT endpoint found");
           if (auth?.accessToken && !config.headers['Authorization']) {
             config.headers['Authorization'] = `Bearer ${auth.accessToken}`;
-          }
+          }cha
         }
 
         // Add CSRF token to the request body if required

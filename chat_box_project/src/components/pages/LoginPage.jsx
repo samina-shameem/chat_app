@@ -9,6 +9,7 @@ const loginService = async (loginData, axiosPrivate) => {
   try {
     const response = await axiosPrivate.post('/auth/token', loginData);
     console.info('Logged in successfully');
+    console.info(response);
     return response.data;
   } catch (error) {
     console.error('Error generating auth token:', error);
@@ -24,12 +25,15 @@ const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const axiosPrivate = useAxiosPrivate(); // Get axios instance
+  const axiosPrivate = useAxiosPrivate();
+  const from = location.state?.from?.pathname || "/chat";
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
     setLoading(true);
+    
 
     try {
       const loginData = { username, password };
@@ -47,15 +51,17 @@ const LoginPage = () => {
         setLoading(false);
         return;
       }
-
-      const { token } = response;
+      
+      const accessToken  = response.token;
+      console.info(accessToken);
 
       // Set auth with username, password, and token
-      login({ username, password, token });
-
+      login({ username, password, accessToken });
+      setUsername('');
+      setPassword('');
       setLoading(false);
-      console.info('Going to dashboard...');
-      navigate("/dashboard");
+      console.info('Going to :',{from});
+      navigate(from, { replace: true });
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Login failed. Please try again.");

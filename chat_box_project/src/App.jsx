@@ -10,7 +10,7 @@ import LoginPage from './components/pages/LoginPage';
 import Unauthorized from './components/pages/Unauthorized';
 
 import RequireAuth from './components/auth/RequireAuth';
-import ChatPage from './components/pages/ChatPage';
+import Chat from './components/pages/Chat';
 import Dashboard from './components/pages/Dashboard';
 import LogoutButton from './components/pages/LogoutButton';
 
@@ -26,7 +26,7 @@ function App() {
         
         {/* we want to protect these routes */}
         <Route element={<RequireAuth />}>
-          <Route path="/chat" element={<ChatPage />} />        
+          <Route path="/chat" element={<Chat />} />        
           <Route path="/dashboard" element={<Dashboard />} />                  
         </Route>
 

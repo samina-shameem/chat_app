@@ -6,7 +6,7 @@ const fetchCsrfToken = async (axiosInstance) => {
   try {
     const response = await axiosInstance.patch('/csrf');
     console.debug('Fetched CSRF token');
-    return response.data.csrfToken; // Assuming response contains csrfToken
+    return response.data?.csrfToken; // Return null if response.data is null
   } catch (error) {
     console.error('Error fetching CSRF token:', error);
     throw error;
@@ -14,7 +14,7 @@ const fetchCsrfToken = async (axiosInstance) => {
 };
 
 const generateToken = async (axiosInstance, auth) => {
-  if (!auth?.username || !auth?.password) {
+  if (!auth || !auth.username || !auth.password) {
     throw new Error('No username or password found for token generation');
   }
 
@@ -36,10 +36,8 @@ const useAxiosPrivate = () => {
 
   // List of endpoints that require CSRF token
   const csrfEndpoints = ['/auth/register', '/auth/token'];
-
   // List of endpoints that require JWT
   const jwtEndpoints = ['/messages', '/users', '/user'];
-
   useEffect(() => {
     const requestIntercept = axiosPrivate.interceptors.request.use(
       async (config) => {
@@ -47,10 +45,16 @@ const useAxiosPrivate = () => {
         console.info(config.url);
         // Add JWT to the Authorization header if required
         if (jwtEndpoints.some((endpoint) => config.url.includes(endpoint))) {
-            console.info("JWT endpoint found");
-          if (auth?.accessToken && !config.headers['Authorization']) {
-            config.headers['Authorization'] = `Bearer ${auth.accessToken}`;
-          }cha
+          console.info("JWT endpoint found");
+          console.info(auth);
+          console.info(config);
+          if (auth?.accessToken && !config.headers?.['Authorization']) {
+            config.headers = {
+              ...config.headers,
+              Authorization: `Bearer ${auth.accessToken}`,
+            };
+            console.info(config);
+          }
         }
 
         // Add CSRF token to the request body if required
@@ -89,6 +93,11 @@ const useAxiosPrivate = () => {
       async (error) => {
         const prevRequest = error?.config;
 
+        if (!prevRequest || !prevRequest.url) {
+          console.error('Config or config.url is null');
+          return Promise.reject(new Error('Config or config.url is null'));
+        }
+
         // Check for 403 Forbidden errors and handle JWT refresh
         if (
           error?.response?.status === 403 &&
@@ -98,7 +107,10 @@ const useAxiosPrivate = () => {
           prevRequest.sent = true;
           try {
             const newAccessToken = await generateToken(axiosPrivate, auth);
-            prevRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+            prevRequest.headers = {
+              ...prevRequest.headers,
+              Authorization: `Bearer ${newAccessToken}`,
+            };
             return axiosPrivate(prevRequest);
           } catch (tokenError) {
             console.error('Failed to refresh token:', tokenError);
@@ -141,3 +153,4 @@ const useAxiosPrivate = () => {
 };
 
 export default useAxiosPrivate;
+

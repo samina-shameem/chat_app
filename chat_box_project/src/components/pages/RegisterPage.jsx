@@ -1,109 +1,113 @@
-import React from 'react';
-
-import { Form, Button } from 'react-bootstrap';
-
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Form, Button } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const RegisterPage = () => {
-    const [username, setUsername] = React.useState('');
-    const [password, setPassword] = React.useState('');
-    const [email, setEmail] = React.useState('');
-    const [passwordConfirm, setPasswordConfirm] = React.useState('');
-    const [emailConfirm, setEmailConfirm] = React.useState('');
-    const [emailError, setEmailError] = React.useState('');
-    const [passwordError, setPasswordError] = React.useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const axiosPrivate = useAxiosPrivate(); 
 
-    const handleEmailChange = (event) => {
-        setEmail(event.target.value);
-        if (email !== emailConfirm) {
-            setEmailError('Email confirmation does not match');
-        } else {
-            setEmailError('');
-        }
-    };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+    setLoading(true);
 
-    const handleEmailConfirmChange = (event) => {
-        setEmailConfirm(event.target.value);
-        if (email !== emailConfirm) {
-            setEmailError('Email confirmation does not match');
-        } else {
-            setEmailError('');
-        }
-    };
+    try {
+      const registerData = {
+        username,
+        password,
+        email,
+        avatar: ""
+      };
 
-    const handlePasswordChange = (event) => {
-        setPassword(event.target.value);
-        if (password !== passwordConfirm) {
-            setPasswordError('Password confirmation does not match');
-        } else {
-            setPasswordError('');
-        }
-    };
+      if (!registerData.username || !registerData.password || !registerData.email) {
+        setError("Username, password, and email are required");
+        setLoading(false);
+        return;
+      }
 
-    const handlePasswordConfirmChange = (event) => {
-        setPasswordConfirm(event.target.value);
-        if (password !== passwordConfirm) {
-            setPasswordError('Password confirmation does not match');
-        } else {
-            setPasswordError('');
-        }
-    };
+      console.info("Sending registration request...");
+      const response = await axiosPrivate.post('/auth/register', registerData);
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        if (email !== emailConfirm) {
-            alert('Email confirmation does not match');
-            return;
-        }
-        if (password !== passwordConfirm) {
-            alert('Password confirmation does not match');
-            return;
-        }
-        try {
-            await registerService(username, email, password);
-            alert('User registered successfully');
-        } catch (error) {
-            console.error('Registration failed', error);
-            alert('Registration failed');
-        }
-    };
+      if (response.status === 201) {
+        const { message } = response.data;
+        setLoading(false);
+        console.info(`Registration successful: ${message}`);
+        navigate("/login", { state: { message } });
+      } else if (response.status === 400) {
+        console.error("Bad request");
+        setError("Bad request");
+        setLoading(false);
+      } else if (response.status === 500) {
+        console.error("Internal error");
+        setError("Internal error");
+        setLoading(false);
+      } else {
+        console.error("Registration failed. Please try again.");
+        setError("Registration failed. Please try again.");
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error(`Registration failed: ${err.response?.data?.message || "Unknown error"}`);
+      setError(err.response?.data?.message || "Registration failed. Please try again.");
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="d-flex justify-content-center">
-            <Form onSubmit={handleSubmit}>
-                <Form.Group>
-                    <Form.Label>Username:</Form.Label>
-                    <Form.Control style={{width: '300px'}} type="text" value={username} onChange={event => setUsername(event.target.value)} />
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Email:</Form.Label>
-                    <Form.Control style={{width: '300px'}} type="email" value={email} onChange={handleEmailChange} />
-                    {emailError && <Form.Text className="text-danger">{emailError}</Form.Text>}
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Confirm Email:</Form.Label>
-                    <Form.Control style={{width: '300px'}} type="email" value={emailConfirm} onChange={handleEmailConfirmChange} />
-                    {emailError && <Form.Text className="text-danger">{emailError}</Form.Text>}
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Password:</Form.Label>
-                    <Form.Control style={{width: '300px'}} type="password" value={password} onChange={handlePasswordChange} />
-                    {passwordError && <Form.Text className="text-danger">{passwordError}</Form.Text>}
-                </Form.Group>
-                <Form.Group>
-                    <Form.Label>Confirm Password:</Form.Label>
-                    <Form.Control style={{width: '300px'}} type="password" value={passwordConfirm} onChange={handlePasswordConfirmChange} />
-                    {passwordError && <Form.Text className="text-danger">{passwordError}</Form.Text>}
-                </Form.Group>
-                <Button style={{width: '300px'}} variant="primary" type="submit">
-                    Register
-                </Button>
-                <p className="mt-2">
-                    Already registered? <Link to="/login">Login</Link>
-                </p>
-            </Form>
-        </div>
-    );
+  return (
+    <div className="d-flex justify-content-center">
+      <Form onSubmit={handleSubmit}>
+        <Form.Group>
+          <Form.Label>Username:</Form.Label>
+          <Form.Control
+            style={{ width: "300px" }}
+            type="text"
+            value={username}
+            onChange={({ target }) => setUsername(target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group>
+          <Form.Label>Email:</Form.Label>
+          <Form.Control
+            style={{ width: "300px" }}
+            type="email"
+            value={email}
+            onChange={({ target }) => setEmail(target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group>
+          <Form.Label>Password:</Form.Label>
+          <Form.Control
+            style={{ width: "300px" }}
+            type="password"
+            value={password}
+            onChange={({ target }) => setPassword(target.value)}
+          />
+        </Form.Group>
+
+        <Button
+          style={{ width: "300px" }}
+          variant="primary"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Loading..." : "Register"}
+        </Button>
+        <p className="mt-2">
+          Already registered? <Link to="/login">Login</Link>
+        </p>
+        {error && <div style={{ color: "red" }}>{error}</div>}
+      </Form>
+    </div>
+  );
 };
 
 export default RegisterPage;
+

@@ -1,6 +1,6 @@
 import React from "react";
 import { Form, Button } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
@@ -23,6 +23,7 @@ const LoginPage = () => {
   const [loading, setLoading] = React.useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const axiosPrivate = useAxiosPrivate(); // Get axios instance
 
   const handleSubmit = async (event) => {
@@ -64,11 +65,12 @@ const LoginPage = () => {
 
   return (
     <div className="d-flex justify-content-center">
-      <Form onSubmit={handleSubmit}>
+      {location.state?.message && <Alert variant="success" className="mb-4">{location.state.message}</Alert>}
+      <Form className="border p-4 mb-4" onSubmit={handleSubmit}>
         <Form.Group>
           <Form.Label>Username:</Form.Label>
           <Form.Control
-            style={{ width: "300px" }}
+            className="w-100"
             type="text"
             value={username}
             onChange={({ target }) => setUsername(target.value)}
@@ -78,7 +80,7 @@ const LoginPage = () => {
         <Form.Group>
           <Form.Label>Password:</Form.Label>
           <Form.Control
-            style={{ width: "300px" }}
+            className="w-100"
             type="password"
             value={password}
             onChange={({ target }) => setPassword(target.value)}
@@ -86,7 +88,7 @@ const LoginPage = () => {
         </Form.Group>
 
         <Button
-          style={{ width: "300px" }}
+          className="w-100"
           variant="primary"
           type="submit"
           disabled={loading}
@@ -103,3 +105,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

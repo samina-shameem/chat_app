@@ -53,6 +53,7 @@ const LoginPage = () => {
       login({ username, password, token });
 
       setLoading(false);
+      console.info('Going to dashboard...');
       navigate("/dashboard");
     } catch (err) {
       console.error(err);

@@ -5,11 +5,14 @@ const RequireAuth = () => {
     const { auth } = useAuth();
     const location = useLocation();
 
+    console.debug('RequireAuth', { auth, location });
+
     return (
-        auth?.user
+        auth?.username
             ? <Outlet />
             : <Navigate to="/login" state={{ from: location }} replace />
     );
 }
+
 
 export default RequireAuth;

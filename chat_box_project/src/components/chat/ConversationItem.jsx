@@ -52,6 +52,7 @@ const ConversationItem = ({ conversationId, onInviteClick }) => {
 
   const renderAvatar = (userId) => (
     <div
+      key={userId}
       style={{
         width: '30px',
         height: '30px',
@@ -68,26 +69,36 @@ const ConversationItem = ({ conversationId, onInviteClick }) => {
 
   return (
     <Accordion.Item eventKey={conversationId}>
-      <Accordion.Header onClick={() => setIsActive(!isActive)}>
-        {/* Display avatars of all participants */}
-        {Array.from(participants).map((userId) => renderAvatar(userId))}
-
+      <Accordion.Header onClick={() => setIsActive(!isActive)} style={{ justifyContent: 'center' }}>
         <div
           style={{
-            width: '30px',
-            height: '30px',
-            borderRadius: '50%',
-            backgroundColor: '#ccc',
-            textAlign: 'center',
-            lineHeight: '30px',
-            marginLeft: 'auto',
-          }}
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent Accordion toggle
-            onInviteClick(conversationId);
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '10px',
+            flex: '1', // Makes sure the content is centered
           }}
         >
-          +
+          {/* Invite button first */}
+          <div
+            style={{
+              width: '30px',
+              height: '30px',
+              borderRadius: '50%',
+              backgroundColor: '#ccc',
+              textAlign: 'center',
+              lineHeight: '30px',
+            }}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent Accordion toggle
+              onInviteClick(conversationId);
+            }}
+          >
+            +
+          </div>
+
+          {/* Display avatars of all participants */}
+          {Array.from(participants).map((userId) => renderAvatar(userId))}
         </div>
       </Accordion.Header>
 

@@ -6,66 +6,46 @@ import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import ConversationItem from './ConversationItem';
 import useAuth from '../hooks/useAuth';
 
+// Define userService to fetch user info
 const Conversations = () => {
   const axiosPrivate = useAxiosPrivate();
   const [conversations, setConversations] = useState([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteConversationId, setInviteConversationId] = useState(null);
   const [newUserId, setNewUserId] = useState('');
-  const [currentUserId, setCurrentUserId] = useState('');
-  const { auth } = useAuth();
+  const { auth, setUserDetails } = useAuth();
 
-  // Function to get the current user's ID
-  const setUserIDs = async () => {
+  // Function to get the current user's ID and details
+  const fetchUserAndConversations = async () => {
     try {
-      const userRes = await axiosPrivate.get('/users');
-      const currentUser = userRes.data.find(user => user.username === auth.username);
-      console.log(currentUser);
+      const [usersRes, conversationsRes] = await Promise.all([
+        axiosPrivate.get('/users'),
+        axiosPrivate.get('/conversations'),
+      ]);
+
+      const userList = usersRes.data;
+      const currentUser = userList.find(user => user.username === auth.username);
+
       if (currentUser) {
-        setCurrentUserId(currentUser.userID);
-      } else {
-        console.error("User not found");
+        setUserDetails({
+          userID: currentUser.userId,
+          avatar: currentUser.avatar,
+          userList,
+        });
       }
+
+      const uniqueConversations = [...new Set([...conversationsRes.data])];
+      setConversations(uniqueConversations);
     } catch (err) {
-      console.error('Error fetching user data', err);
+      console.error('Error fetching users or conversations', err);
     }
   };
 
-  // Fetch conversations
   useEffect(() => {
-    const fetchConversations = async () => {
-      try {
-        //await setUserIDs();
-
-        // Fetch conversations directly related to the user
-        console.log('fetching conversations');
-        const conversationsRes = await axiosPrivate.get('/conversations');
-        console.log(conversationsRes.data);
-        const userConversations = conversationsRes.data;
-        console.log('got conversations');
-        /*
-        // Fetch invitations for the current user
-        const userResponse = await axiosPrivate.get(`/users/${currentUserId}`);
-        console.log(userResponse.data);
-        const invitedConversations = userResponse.data.invite.map(invite => invite.conversationId);
-
-        // Fetch conversations where the current user posted messages
-        const messagesResponse = await axiosPrivate.get('/messages');
-        const conversationsPostedByUserSelf = [...new Set(messagesResponse.data.map(msg => msg.conversationId))];
-        */
-
-        // Merge all conversations and remove duplicates
-        //const uniqueConversations = [...new Set([...userConversations, ...invitedConversations, ...conversationsPostedByUserSelf])];
-        const uniqueConversations = [...new Set([...userConversations])];
-        setConversations(uniqueConversations);
-
-      } catch (err) {
-        console.error('Error fetching conversations', err);
-      }
-    };
-
-    fetchConversations();
-  }, [currentUserId, axiosPrivate]);
+    if (auth.username) {
+      fetchUserAndConversations();
+    }
+  }, [auth.username, axiosPrivate, setUserDetails]);
 
   const handleInviteClick = (conversationId) => {
     setInviteConversationId(conversationId);

@@ -6,11 +6,23 @@ export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({
     username: "",
     password: "",
-    accessToken: ""
+    accessToken: "",
+    userID: "",
+    avatar: ""
   });
   const login = (authData) => {
     console.info('Logging in with:', authData);
     setAuth(authData);
+  };
+  const setUserDetails = (userData) => {
+    if (auth && userData) {
+      setAuth((prevAuth) => ({
+        ...prevAuth,
+        ...userData,
+      }));
+    } else {
+      console.error("setUserDetails: auth or userData is null or undefined");
+    }
   };
 
   const logout = () => {
@@ -19,7 +31,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ auth, login, logout }}>
+    <AuthContext.Provider value={{ auth, login, logout,setUserDetails }}>
       {children}
     </AuthContext.Provider>
   );

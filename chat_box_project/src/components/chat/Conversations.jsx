@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import Accordion from 'react-bootstrap/Accordion';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import useAxiosPrivate from '../hooks/useAxiosPrivate';
-import ConversationItem from './ConversationItem';
-import useAuth from '../hooks/useAuth';
+import React, { useEffect, useState } from "react";
+import Accordion from "react-bootstrap/Accordion";
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import ConversationItem from "./ConversationItem";
+import useAuth from "../hooks/useAuth";
 
 // Define userService to fetch user info
 const Conversations = () => {
@@ -12,47 +12,71 @@ const Conversations = () => {
   const [conversations, setConversations] = useState([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteConversationId, setInviteConversationId] = useState(null);
-  const [newUserId, setNewUserId] = useState('');
+  const [newUserId, setNewUserId] = useState("");
   const { auth, setUserDetails } = useAuth();
 
-  // Function to get the current user's ID and details
   const fetchUserAndConversations = async () => {
     try {
+      if (!auth.username) {
+        return;
+      }
+
       const [usersRes, conversationsRes] = await Promise.all([
-        axiosPrivate.get('/users'),
-        axiosPrivate.get('/conversations'),
+        axiosPrivate.get("/users"),
+        axiosPrivate.get("/conversations"),
       ]);
       const conversationsByThisUser = conversationsRes.data;
       const userList = usersRes.data;
-      const currentUser = userList.find(user => user.username === auth.username);
+      const currentUser = userList.find(
+        (user) => user.username === auth.username
+      );
 
-      if (currentUser) {
-        setUserDetails({
-          userID: currentUser.userId,
-          avatar: currentUser.avatar,
-          userList,
-        });
+      if (!currentUser) {
+        console.error("User not found");
+        return;
       }
 
-      // get invitations
-      const userDetailsRes = await axiosPrivate.get('/users/'+currentUser.userId);
-      console.log(userDetailsRes.data[0]);
-      console.log("parsing invited conversations:");
-      const invitedConversationsData = userDetailsRes.data[0].invite;
-      console.log('Invite:', invitedConversationsData)
-      const invitedConversationsArray = invitedConversationsData ? JSON.parse(invitedConversationsData) : [];
-      console.log('Invite parsed array:', invitedConversationsArray)
-      const invitedConversationsIds = invitedConversationsArray.map(invite => invite.conversationId);      
-      console.log('Invited conversations:', invitedConversationsIds);
-      conversationsByThisUser
-      console.log('conversations by this user:', conversationsByThisUser);
+      setUserDetails({
+        userID: currentUser.userId,
+        avatar: currentUser.avatar,
+        userList,
+      });
 
-      const allConversations = [...conversationsByThisUser, ...invitedConversationsIds];
-      const uniqueConversations = [...new Set(allConversations)];
+      // Fetch invited conversations
+      const userDetailsRes = await axiosPrivate.get(
+        "/users/" + currentUser.userId
+      );
+      const invitedConversationsData = userDetailsRes.data[0]?.invite;
+      const invitedConversationsArray = invitedConversationsData
+        ? JSON.parse(invitedConversationsData)
+        : [];
+      const invitedConversationsIds = invitedConversationsArray.map(
+        (invite) => invite.conversationId
+      );
+
+      // Combine and deduplicate conversations
+      const allConversations = new Set([
+        ...conversationsByThisUser,
+        ...invitedConversationsIds,
+      ]);
+      const uniqueConversations = Array.from(allConversations).map(
+        (conversationId) => {
+          let status = "invited"; // Default to invited
+          if (
+            conversationsByThisUser.includes(conversationId) &&
+            invitedConversationsIds.includes(conversationId)
+          ) {
+            status = "invited-then-added";
+          } else if (conversationsByThisUser.includes(conversationId)) {
+            status = "started";
+          }
+          return { id: conversationId, status };
+        }
+      );
+
       setConversations(uniqueConversations);
-      console.log(uniqueConversations);
     } catch (err) {
-      console.error('Error fetching users or conversations', err);
+      console.error("Error fetching users or conversations", err);
     }
   };
 
@@ -60,7 +84,7 @@ const Conversations = () => {
     if (auth.username) {
       fetchUserAndConversations();
     }
-  }, [auth.username]);
+  }, [auth.username, axiosPrivate]);
 
   const handleInviteClick = (conversationId) => {
     setInviteConversationId(conversationId);
@@ -69,31 +93,37 @@ const Conversations = () => {
 
   const handleInviteUser = async () => {
     try {
-      await axiosPrivate.post(`/invite/${newUserId}`, { conversationId: inviteConversationId });
+      if (!newUserId || !inviteConversationId) {
+        console.error("Missing required fields");
+        return;
+      }
+
+      await axiosPrivate.post(`/invite/${newUserId}`, {
+        conversationId: inviteConversationId,
+      });
       setShowInviteModal(false);
     } catch (err) {
-      console.error('Error inviting user', err);
+      console.error("Error inviting user", err);
     }
   };
 
   return (
     <>
       <Accordion>
-        {/* Empty conversation item to start new conversations */}
         <Accordion.Item eventKey="new-conversation">
           <Accordion.Header>
-            <div style={{ display: 'flex', alignItems: 'center' }}>              
+            <div style={{ display: "flex", alignItems: "center" }}>
               <div
                 style={{
-                  width: '30px',
-                  height: '30px',
-                  borderRadius: '50%',
-                  backgroundColor: '#ccc',
-                  textAlign: 'center',
-                  lineHeight: '30px',
-                  marginLeft: 'auto',
+                  width: "30px",
+                  height: "30px",
+                  borderRadius: "50%",
+                  backgroundColor: "#ccc",
+                  textAlign: "center",
+                  lineHeight: "30px",
+                  marginLeft: "auto",
                 }}
-                onClick={() => handleInviteClick(null)} // Open invite for a new conversation
+                onClick={() => handleInviteClick(null)}
               >
                 +
               </div>
@@ -102,17 +132,16 @@ const Conversations = () => {
           </Accordion.Header>
         </Accordion.Item>
 
-        {/* Existing conversations */}
-        {conversations.map((conversationId) => (
+        {conversations.map((conversation) => (
           <ConversationItem
-            key={conversationId}
-            conversationId={conversationId}
-            onInviteClick={handleInviteClick} // Pass the invite handler to child
+            key={conversation.id}
+            conversationId={conversation.id}
+            status={conversation.status}
+            onInviteClick={handleInviteClick}
           />
         ))}
       </Accordion>
 
-      {/* Modal for inviting a user */}
       <Modal show={showInviteModal} onHide={() => setShowInviteModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Invite User</Modal.Title>

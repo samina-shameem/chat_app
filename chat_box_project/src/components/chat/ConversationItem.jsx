@@ -23,6 +23,7 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
     if (!localConversationId) {
       localConversationId = uuidv4();
       console.warn("Conversation ID is empty, assigning a UUID");
+      console.warn("Local conversation ID:", localConversationId);
     }
 
     const fetchMessages = async () => {

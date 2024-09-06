@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Accordion from "react-bootstrap/Accordion";
-import Button from "react-bootstrap/Button";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import ConversationItem from "./ConversationItem";
 import useAuth from "../hooks/useAuth";
@@ -9,7 +8,6 @@ import useAuth from "../hooks/useAuth";
 const Conversations = () => {
   const axiosPrivate = useAxiosPrivate();
   const [conversations, setConversations] = useState([{}]);
-  const [newUserId, setNewUserId] = useState("");
   const { auth, setUserDetails } = useAuth();
 
   const fetchUserAndConversations = async () => {
@@ -88,30 +86,14 @@ const Conversations = () => {
     }
   }, [auth.username, axiosPrivate]);
 
-  const handleInviteUser = async () => {
-    try {
-      if (!newUserId) {
-        console.error("Missing required fields");
-        return;
-      }
-
-      await axiosPrivate.post(`/invite/${newUserId}`, {
-        conversationId: null,
-      });
-    } catch (err) {
-      console.error("Error inviting user", err);
-    }
-  };
-
   return (
     <>
       <Accordion>
         {conversations.map((conversation) => (
           <ConversationItem
-            key={conversation.id ? conversation.id : `new-conversation-${newUserId}`}
+            key={conversation.id ? conversation.id : `new-conversation-${uuidv4()}`}
             conversationId={conversation.id}
             status={conversation.status}
-            onInviteClick={() => handleInviteUser(conversation.id)}
           />
         ))}
       </Accordion>
@@ -120,4 +102,5 @@ const Conversations = () => {
 };
 
 export default Conversations;
+
 

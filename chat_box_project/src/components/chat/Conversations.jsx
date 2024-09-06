@@ -3,7 +3,7 @@ import Accordion from "react-bootstrap/Accordion";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import ConversationItem from "./ConversationItem";
 import useAuth from "../hooks/useAuth";
-
+import { v4 as uuidv4 } from 'uuid';
 // Define userService to fetch user info
 const Conversations = () => {
   const axiosPrivate = useAxiosPrivate();

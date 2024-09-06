@@ -22,7 +22,7 @@ const Conversations = () => {
         axiosPrivate.get('/users'),
         axiosPrivate.get('/conversations'),
       ]);
-
+      const conversationsByThisUser = conversationsRes.data;
       const userList = usersRes.data;
       const currentUser = userList.find(user => user.username === auth.username);
 
@@ -34,7 +34,21 @@ const Conversations = () => {
         });
       }
 
-      const uniqueConversations = [...new Set([...conversationsRes.data])];
+      // get invitations
+      const userDetailsRes = await axiosPrivate.get('/users/'+currentUser.userId);
+      console.log(userDetailsRes.data[0]);
+      console.log("parsing invited conversations:");
+      const invitedConversationsData = userDetailsRes.data[0].invite;
+      console.log('Invite:', invitedConversationsData)
+      const invitedConversationsArray = invitedConversationsData ? JSON.parse(invitedConversationsData) : [];
+      console.log('Invite parsed array:', invitedConversationsArray)
+      const invitedConversationsIds = invitedConversationsArray.map(invite => invite.conversationId);      
+      console.log('Invited conversations:', invitedConversationsIds);
+      conversationsByThisUser
+      console.log('conversations by this user:', conversationsByThisUser);
+
+      const allConversations = [...conversationsByThisUser, ...invitedConversationsIds];
+      const uniqueConversations = [...new Set(allConversations)];
       setConversations(uniqueConversations);
       console.log(uniqueConversations);
     } catch (err) {

@@ -38,9 +38,7 @@ const Conversations = () => {
       });
 
       // Fetch invited conversations
-      const userDetailsRes = await axiosPrivate.get(
-        "/users/" + currentUser.userId
-      );
+      const userDetailsRes = await axiosPrivate.get( "/users/" + currentUser.userId);
       const invitedConversationsData = userDetailsRes.data[0]?.invite;
       const invitedConversationsArray = invitedConversationsData
         ? JSON.parse(invitedConversationsData)
@@ -49,14 +47,20 @@ const Conversations = () => {
         (invite) => invite.conversationId
       );
 
+      // Fetch all conversations(including self, without invited and started)
+      const allMessagesRes = await axiosPrivate.get( "/messages");
+      const allMessagesConversationIds = allMessagesRes.data.map(message => message.conversationId);
+
+
       // Combine and deduplicate conversations
       const allConversations = new Set([
+        ...allMessagesConversationIds,
         ...conversationsByThisUser,
         ...invitedConversationsIds,
       ]);
       const uniqueConversations = Array.from(allConversations).map(
         (conversationId) => {
-          let status = "invited"; // Default to invited
+          let status = "self"; // Default to self if conversationId is not found in other arrays
           if (
             conversationsByThisUser.includes(conversationId) &&
             invitedConversationsIds.includes(conversationId)
@@ -64,6 +68,8 @@ const Conversations = () => {
             status = "invited-then-added";
           } else if (conversationsByThisUser.includes(conversationId)) {
             status = "started";
+          } else if (invitedConversationsIds.includes(conversationId)) {
+            status = "invited";
           }
           return { id: conversationId, status };
         }

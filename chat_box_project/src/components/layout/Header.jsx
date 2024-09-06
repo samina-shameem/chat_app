@@ -5,7 +5,7 @@ import Avatar from '../profile/Avatar'
 import useAuth from '../hooks/useAuth'
 
 const Header = () => {
-    const { auth } = useAuth()
+    const { auth } = useAuth();
     return (
         <Navbar bg="light" expand="lg">
             <Navbar.Brand as={Link} to="/">Chat Box</Navbar.Brand>

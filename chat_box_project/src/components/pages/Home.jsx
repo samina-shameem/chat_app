@@ -1,21 +1,35 @@
-import React from 'react';
-
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 function Home() {
-    return (
-        <div className="container d-flex align-items-center justify-content-center">
-            <div className="text-center">
-                <h1>Welcome to the Chat Box</h1>
-                <p>Please log in or register to start chatting.</p>
-                <div className="mt-3">
-                    <Link className="btn btn-outline-primary me-2" to="/login">Login</Link>
-                    <Link className="btn btn-primary" to="/register">Register</Link>
-                </div>
-            </div>
+  const { auth } = useAuth();
+  return (
+    <div className="container d-flex align-items-center justify-content-center">
+      <div className="text-center">
+        <h1>Welcome to the Chat Box</h1>
+        <p>Please log in or register to start chatting.</p>
+        <div className="mt-3">
+          {auth?.username ? (
+            <>
+              <Link className="btn btn-primary" to="/Chat">
+                Chat room
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link className="btn btn-primary m-3" to="/login">
+                Login
+              </Link>
+              <Link className="btn btn-primary m-3" to="/register">
+                Register
+              </Link>
+            </>
+          )}
         </div>
-    );
+      </div>
+    </div>
+  );
 }
-
 
 export default Home;

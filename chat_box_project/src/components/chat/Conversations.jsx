@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Accordion from "react-bootstrap/Accordion";
 import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import ConversationItem from "./ConversationItem";
 import useAuth from "../hooks/useAuth";
@@ -9,9 +8,7 @@ import useAuth from "../hooks/useAuth";
 // Define userService to fetch user info
 const Conversations = () => {
   const axiosPrivate = useAxiosPrivate();
-  const [conversations, setConversations] = useState([]);
-  const [showInviteModal, setShowInviteModal] = useState(false);
-  const [inviteConversationId, setInviteConversationId] = useState(null);
+  const [conversations, setConversations] = useState([{}]);
   const [newUserId, setNewUserId] = useState("");
   const { auth, setUserDetails } = useAuth();
 
@@ -74,7 +71,12 @@ const Conversations = () => {
         }
       );
 
-      setConversations(uniqueConversations);
+      setConversations(
+        [
+          { id: "", status: "new conversation" },
+          ...uniqueConversations,
+        ]
+      );
     } catch (err) {
       console.error("Error fetching users or conversations", err);
     }
@@ -86,22 +88,16 @@ const Conversations = () => {
     }
   }, [auth.username, axiosPrivate]);
 
-  const handleInviteClick = (conversationId) => {
-    setInviteConversationId(conversationId);
-    setShowInviteModal(true);
-  };
-
   const handleInviteUser = async () => {
     try {
-      if (!newUserId || !inviteConversationId) {
+      if (!newUserId) {
         console.error("Missing required fields");
         return;
       }
 
       await axiosPrivate.post(`/invite/${newUserId}`, {
-        conversationId: inviteConversationId,
+        conversationId: null,
       });
-      setShowInviteModal(false);
     } catch (err) {
       console.error("Error inviting user", err);
     }
@@ -110,61 +106,18 @@ const Conversations = () => {
   return (
     <>
       <Accordion>
-        <Accordion.Item eventKey="new-conversation">
-          <Accordion.Header>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <div
-                style={{
-                  width: "30px",
-                  height: "30px",
-                  borderRadius: "50%",
-                  backgroundColor: "#ccc",
-                  textAlign: "center",
-                  lineHeight: "30px",
-                  marginLeft: "auto",
-                }}
-                onClick={() => handleInviteClick(null)}
-              >
-                +
-              </div>
-              <span> Start a new conversation</span>
-            </div>
-          </Accordion.Header>
-        </Accordion.Item>
-
         {conversations.map((conversation) => (
           <ConversationItem
-            key={conversation.id}
+            key={conversation.id ? conversation.id : `new-conversation-${newUserId}`}
             conversationId={conversation.id}
             status={conversation.status}
-            onInviteClick={handleInviteClick}
+            onInviteClick={() => handleInviteUser(conversation.id)}
           />
         ))}
       </Accordion>
-
-      <Modal show={showInviteModal} onHide={() => setShowInviteModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Invite User</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <input
-            type="text"
-            placeholder="Enter user ID"
-            value={newUserId}
-            onChange={(e) => setNewUserId(e.target.value)}
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowInviteModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleInviteUser}>
-            Invite
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </>
   );
 };
 
 export default Conversations;
+

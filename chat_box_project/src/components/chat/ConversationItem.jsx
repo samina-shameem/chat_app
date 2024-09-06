@@ -6,8 +6,9 @@ import Button from "react-bootstrap/Button";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAuth from "../hooks/useAuth";
 import Avatar from "../profile/Avatar";
+import { v4 as uuidv4 } from 'uuid';
 
-const REFRESH_RATE = 0; // Set to 0 for manual refresh
+const REFRESH_RATE = 0; // Set to 0 for manual refresh, donot remove this if will be set later
 const ConversationItem = ({ conversationId, status, onInviteClick }) => {
   const axiosPrivate = useAxiosPrivate();
   const { auth } = useAuth();
@@ -18,6 +19,12 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
   const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
+    let localConversationId = conversationId;
+    if (!localConversationId) {
+      localConversationId = uuidv4();
+      console.warn("Conversation ID is empty, assigning a UUID");
+    }
+
     const fetchMessages = async () => {
       if (!axiosPrivate) {
         console.error("axiosPrivate is null");
@@ -26,7 +33,7 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
 
       try {
         const response = await axiosPrivate.get(
-          `/messages?conversationId=${conversationId}`
+          `/messages?conversationId=${localConversationId}`
         );
         if (!response || !response.data) {
           console.error("No response or data from message fetch");
@@ -49,13 +56,17 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
         setMessages(sortedMessages);
       } catch (err) {
         console.error(
-          `Error fetching messages for conversation ${conversationId}`,
+          `Error fetching messages for conversation ${localConversationId}`,
           err
         );
       }
     };
 
-    fetchMessages();
+    if (localConversationId) {
+      fetchMessages();
+    } else {
+      setMessages([]);
+    }
   }, [conversationId, axiosPrivate, refresh]);
 
   const handleSendMessage = async () => {
@@ -67,7 +78,7 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
     try {
       await axiosPrivate.post("/messages", {
         text: newMessage,
-        conversationId,
+        conversationId: conversationId,
       });
       setNewMessage("");
     } catch (err) {

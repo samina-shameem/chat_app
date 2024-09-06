@@ -20,8 +20,9 @@ const Conversations = () => {
     try {
       const userRes = await axiosPrivate.get('/users');
       const currentUser = userRes.data.find(user => user.username === auth.username);
+      console.log(currentUser);
       if (currentUser) {
-        setCurrentUserId(currentUser.id);
+        setCurrentUserId(currentUser.userID);
       } else {
         console.error("User not found");
       }
@@ -34,22 +35,28 @@ const Conversations = () => {
   useEffect(() => {
     const fetchConversations = async () => {
       try {
-        await setUserIDs();
+        //await setUserIDs();
 
         // Fetch conversations directly related to the user
+        console.log('fetching conversations');
         const conversationsRes = await axiosPrivate.get('/conversations');
+        console.log(conversationsRes.data);
         const userConversations = conversationsRes.data;
-
+        console.log('got conversations');
+        /*
         // Fetch invitations for the current user
         const userResponse = await axiosPrivate.get(`/users/${currentUserId}`);
+        console.log(userResponse.data);
         const invitedConversations = userResponse.data.invite.map(invite => invite.conversationId);
 
         // Fetch conversations where the current user posted messages
         const messagesResponse = await axiosPrivate.get('/messages');
         const conversationsPostedByUserSelf = [...new Set(messagesResponse.data.map(msg => msg.conversationId))];
+        */
 
         // Merge all conversations and remove duplicates
-        const uniqueConversations = [...new Set([...userConversations, ...invitedConversations, ...conversationsPostedByUserSelf])];
+        //const uniqueConversations = [...new Set([...userConversations, ...invitedConversations, ...conversationsPostedByUserSelf])];
+        const uniqueConversations = [...new Set([...userConversations])];
         setConversations(uniqueConversations);
 
       } catch (err) {
@@ -80,8 +87,7 @@ const Conversations = () => {
         {/* Empty conversation item to start new conversations */}
         <Accordion.Item eventKey="new-conversation">
           <Accordion.Header>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span>Start a new conversation</span>
+            <div style={{ display: 'flex', alignItems: 'center' }}>              
               <div
                 style={{
                   width: '30px',
@@ -96,6 +102,7 @@ const Conversations = () => {
               >
                 +
               </div>
+              <span> Start a new conversation</span>
             </div>
           </Accordion.Header>
         </Accordion.Item>

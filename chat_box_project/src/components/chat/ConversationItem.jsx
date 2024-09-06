@@ -4,12 +4,14 @@ import Badge from 'react-bootstrap/Badge';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import useAuth from '../hooks/useAuth';
 
 const ConversationItem = ({ conversationId, onInviteClick }) => {
   const axiosPrivate = useAxiosPrivate();
+  const { auth } = useAuth();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [user, setUser] = useState({});
+  const [participants, setParticipants] = useState(new Set()); // Store unique userIds
   const [isActive, setIsActive] = useState(false);
 
   // Fetch messages for this conversation
@@ -17,7 +19,12 @@ const ConversationItem = ({ conversationId, onInviteClick }) => {
     const fetchMessages = async () => {
       try {
         const response = await axiosPrivate.get(`/messages?conversationId=${conversationId}`);
-        setMessages(response.data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)));
+        const sortedMessages = response.data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+        // Collect unique participants from messages
+        const uniqueParticipants = new Set(sortedMessages.map((message) => message.userId));
+        setParticipants(uniqueParticipants);
+        setMessages(sortedMessages);
       } catch (err) {
         console.error(`Error fetching messages for conversation ${conversationId}`, err);
       }
@@ -31,20 +38,6 @@ const ConversationItem = ({ conversationId, onInviteClick }) => {
     }
   }, [conversationId, isActive, axiosPrivate]);
 
-  // Fetch user info for this conversation
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axiosPrivate.get(`/users/${conversationId}`);
-        setUser(response.data);
-      } catch (err) {
-        console.error(`Error fetching user for conversation ${conversationId}`, err);
-      }
-    };
-
-    fetchUser();
-  }, [conversationId, axiosPrivate]);
-
   const handleSendMessage = async () => {
     try {
       await axiosPrivate.post('/messages', {
@@ -57,26 +50,28 @@ const ConversationItem = ({ conversationId, onInviteClick }) => {
     }
   };
 
+  const renderAvatar = (userId) => (
+    <div
+      style={{
+        width: '30px',
+        height: '30px',
+        borderRadius: '50%',
+        backgroundColor: '#ccc',
+        textAlign: 'center',
+        lineHeight: '30px',
+        margin: '0 10px',
+      }}
+    >
+      {userId}
+    </div>
+  );
+
   return (
     <Accordion.Item eventKey={conversationId}>
       <Accordion.Header onClick={() => setIsActive(!isActive)}>
-        {user.avatar ? (
-          <img src={user.avatar} alt="Avatar" style={{ width: '30px', height: '30px', borderRadius: '50%' }} />
-        ) : (
-          <div
-            style={{
-              width: '30px',
-              height: '30px',
-              borderRadius: '50%',
-              backgroundColor: '#ccc',
-              textAlign: 'center',
-              lineHeight: '30px',
-            }}
-          >
-            {user.username ? user.username[0].toUpperCase() : 'U'}
-          </div>
-        )}
-        {messages.length > 0 && ` ${messages[0].text.substring(0, 20)}...`}
+        {/* Display avatars of all participants */}
+        {Array.from(participants).map((userId) => renderAvatar(userId))}
+
         <div
           style={{
             width: '30px',
@@ -97,12 +92,29 @@ const ConversationItem = ({ conversationId, onInviteClick }) => {
       </Accordion.Header>
 
       <Accordion.Body>
-        {messages.map((message) => (
-          <Badge key={message.id} bg={message.userId === user.id ? 'primary' : 'secondary'} className="mb-2" style={{ display: 'block' }}>
-            {message.text}
-          </Badge>
-        ))}
+        {messages.map((message) => {
+          const isCurrentUser = message.userId === auth.userID;
+          return (
+            <div
+              key={message.id}
+              className="d-flex mb-2"
+              style={{ justifyContent: isCurrentUser ? 'flex-start' : 'flex-end' }}
+            >
+              {isCurrentUser && renderAvatar(message.userId)}
 
+              <Badge
+                bg={isCurrentUser ? 'primary' : 'secondary'}
+                style={{ padding: '10px', borderRadius: '10px', maxWidth: '70%' }}
+              >
+                {message.text}
+              </Badge>
+
+              {!isCurrentUser && renderAvatar(message.userId)}
+            </div>
+          );
+        })}
+
+        {/* Input for new message */}
         <Form className="mt-3 d-flex">
           <Form.Control
             type="text"

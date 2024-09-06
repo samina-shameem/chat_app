@@ -8,8 +8,7 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 const loginService = async (loginData, axiosPrivate) => {
   try {
     const response = await axiosPrivate.post('/auth/token', loginData);
-    console.info('Logged in successfully');
-    console.info(response);
+    console.info('Logged in successfully');    
     return response.data;
   } catch (error) {
     console.error('Error generating auth token:', error);

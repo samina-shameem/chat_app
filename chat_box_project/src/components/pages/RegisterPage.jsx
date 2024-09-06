@@ -42,7 +42,7 @@ const RegisterPage = () => {
         setIsLoading(false);
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Unknown error");
+      setError(err.response?.data?.error || "Unknown error");
       setIsLoading(false);
     }
   };
@@ -82,7 +82,7 @@ const RegisterPage = () => {
           variant="primary"
           type="submit"
           disabled={isLoading}
-          className="mb-3"
+          className="mb-3 w-100"
         >
           {isLoading ? "Loading..." : "Register"}
         </Button>

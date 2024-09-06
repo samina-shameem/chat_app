@@ -33,42 +33,42 @@ After ensuring the API works as expected, it's time to create a React app that i
 - Only show the "Register" & "Login" pages when the user is logged out.
 
 **Register.jsx:**
-- The user must register first.
-- The username must be unique. If a username already exists, display the API error message: “Username or email already exists.”
-- If registration is successful, provide feedback to the user and automatically redirect them to "Login."
+- [x] The user must register first.
+- [x] The username must be unique. If a username already exists, display the API error message: “Username or email already exists.”
+- [x] If registration is successful, provide feedback to the user and automatically redirect them to "Login."
 
 **Login.jsx:**
-- If incorrect login details are provided, display the API error message: “Invalid credentials.” You can clarify this on the client-side if you wish.
-- On successful login, save the token along with other information like id, user, and avatar in state and/or session/localStorage.
-- The user should remain logged in even after reloading the page.
-- Display the username and avatar somewhere on the page when logged in. Note: Avatar in the database is a varchar(255) that can represent a string, such as a URL to an image, e.g., https://i.pravatar.cc/200.
+- [TODO] If incorrect login details are provided, display the API error message: “Invalid credentials.” You can clarify this on the client-side if you wish.
+- [TODO] On successful login, save the token along with other information like id, user, and avatar in state and/or session/localStorage.
+- [TODO] The user should remain logged in even after reloading the page.
+- [TODO] Display the username and avatar somewhere on the page when logged in. Note: Avatar in the database is a varchar(255) that can represent a string, such as a URL to an image, e.g., https://i.pravatar.cc/200.
 
-- Implement a CSP policy on the client that allows one or more domains whitelisted for images – based on the avatar URL you choose, e.g.:
+- [TODO] Implement a CSP policy on the client that allows one or more domains whitelisted for images – based on the avatar URL you choose, e.g.:
 
 ```html
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://i.pravatar.cc https://freeimage.host;">
 ```
 
-- Redirect to "Chat.jsx" upon successful login.
+- [x] Redirect to "Chat.jsx" upon successful login.
 
 **Chat.jsx:**
-- Display all messages.
-- All messages belonging to the logged-in user should be displayed on the right side.
-- All other messages should be displayed on the left side.
-- The user should be able to create new messages.
-  - Sanitize the content in some way.
-- The user should be able to delete existing messages.
+- [TODO] Display all messages.
+- [TODO] All messages belonging to the logged-in user should be displayed on the right side.
+- [TODO] All other messages should be displayed on the left side.
+- [TODO] The user should be able to create new messages.
+  - [TODO] Sanitize the content in some way.
+- [TODO] The user should be able to delete existing messages.
 
 **SideNav.jsx:**
-- Display via a side navigation, see this example: https://t.ly/PFbQq.
+- [TODO] Display via a side navigation, see this example: https://t.ly/PFbQq.
   - Tips: https://t.ly/iaWJa
-- Only show a logout button that logs out, clears the token, and redirects to the Login page.
+- [TODO] Only show a logout button that logs out, clears the token, and redirects to the Login page.
 
 **General:**
-- You need to host the app on Netlify. Change the site name to something you like. This is to practice hosting and avoid CORS issues, as I've configured the server to whitelist Netlify. 😏
+- [TODO] You need to host the app on Netlify. Change the site name to something you like. This is to practice hosting and avoid CORS issues, as I've configured the server to whitelist Netlify. 😏
 
 **Design**
-- Apply an appropriate framework and/or custom CSS to give your application a stylish design.
+- [x] Apply an appropriate framework and/or custom CSS to give your application a stylish design.
 
 **Grading**
 - You will be graded individually.
@@ -80,19 +80,19 @@ After ensuring the API works as expected, it's time to create a React app that i
 - In addition to meeting the G requirements, the student must also fulfill the following criteria:
 
 - **Some form of logging, see guidelines:** https://t.ly/3nFy2
-- Implement monitoring of logs.
+- [TODO] Implement monitoring of logs.
   - The logs should be uploaded to a tool like Sentry, New Relic, or Rollbar. If you find another free tool, let me know. Take screenshots or provide me with a key (if they have an API) so I can access your logs.
   - You choose which relevant logs to use.
 
 **Chat.jsx:**
-- Handle multiple conversations, at least 2 different ones. Use conversationId, which should be a GUID. `crypto.randomUUID()` is sufficient for modern browsers. Otherwise, this snippet will work.
+- [x] Handle multiple conversations, at least 2 different ones. Use conversationId, which should be a GUID. `crypto.randomUUID()` is sufficient for modern browsers. Otherwise, this snippet will work.
   - Example call: https://chatify-api.up.railway.app/messages?conversationId=5a430141-8064-4388-ab65-9161a245a3f4
   - Swagger: https://chatify-api.up.railway.app/api-docs/#/Messages/get_messages
 
 **Profile.jsx:**
-- Should be the first menu option on a SideNav along with a logout button.
-- The user should be able to update their username, email, and avatar*.
-- The user should be able to delete their account and receive clear feedback/warnings about what they are attempting to do. Upon successful deletion, the user should be logged out and redirected to Login.jsx.
+- [TODO] Should be the first menu option on a SideNav along with a logout button.
+- [TODO] The user should be able to update their username, email, and avatar*.
+- [TODO] The user should be able to delete their account and receive clear feedback/warnings about what they are attempting to do. Upon successful deletion, the user should be logged out and redirected to Login.jsx.
 
 *If the avatar is changed, a preview should be shown after the new URL is entered (can be after a button press or debounced in the input field) OR the user can take their own picture, see https://www.npmjs.com/package/react-webcam, and the image should be hosted somewhere – use a service with an API, e.g., https://freeimage.host/page/api?lang=en, and then the URL should be updated in the avatar column in the database.
 

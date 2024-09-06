@@ -41,7 +41,7 @@ After ensuring the API works as expected, it's time to create a React app that i
 - [x] If incorrect login details are provided, display the API error message: “Invalid credentials.” You can clarify this on the client-side if you wish.
 - [x] On successful login, save the token along with other information like id, user, and avatar in state and/or session/localStorage.
 - [x] The user should remain logged in even after reloading the page.
-- [TODO] Display the username and avatar somewhere on the page when logged in. Note: Avatar in the database is a varchar(255) that can represent a string, such as a URL to an image, e.g., https://i.pravatar.cc/200.
+- [x] Display the username and avatar somewhere on the page when logged in. Note: Avatar in the database is a varchar(255) that can represent a string, such as a URL to an image, e.g., https://i.pravatar.cc/200.
 
 - [TODO] Implement a CSP policy on the client that allows one or more domains whitelisted for images – based on the avatar URL you choose, e.g.:
 

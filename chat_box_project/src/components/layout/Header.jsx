@@ -1,34 +1,34 @@
-import React from 'react'
-import { Navbar, Nav } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
-import Avatar from '../profile/Avatar'
-import useAuth from '../hooks/useAuth'
+import React from "react";
+import { Navbar, Nav, Container } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import Avatar from "../profile/Avatar";
+import useAuth from "../hooks/useAuth";
 
 const Header = () => {
-    const { auth } = useAuth();
-    return (
-        <Navbar bg="light" expand="lg">
-            <Navbar.Brand as={Link} to="/">Chat Box</Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-                <Nav className="mr-auto">
-                    <Nav.Link as={Link} to="/">Home</Nav.Link>
-                    {auth?.username ? (
-                        <>
-                            <Nav.Link as={Link} to="/chat">Chat</Nav.Link>
-                            <Avatar src={auth.avatar} alt={auth.username} />
-                        </>
-                    ) : (
-                        <>
-                            <Nav.Link as={Link} to="/login">Login</Nav.Link>
-                            <Nav.Link as={Link} to="/register">Register</Nav.Link>
-                        </>
-                    )}
-                </Nav>
-            </Navbar.Collapse>
-        </Navbar>
-    )
-}
-
+  const { auth } = useAuth();
+  return (
+    <Navbar bg="primary" data-bs-theme="dark">
+      <Navbar.Brand as={Link} to="/" className="p-4">
+        Chat Box
+      </Navbar.Brand>
+      <Container className="justify-content-end">
+        <Nav className="mr-auto ">
+          {auth?.username ? (
+            <>
+              <Nav.Link className="p-4 mr-3"> {auth?.username}</Nav.Link>
+              <Avatar
+                className="p-4 mr-3"
+                src={auth.avatar}
+                alt={auth.username}
+              />
+            </>
+          ) : (
+            <></>
+          )}
+        </Nav>
+      </Container>
+    </Navbar>
+  );
+};
 
 export default Header;

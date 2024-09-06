@@ -8,16 +8,17 @@ function Home() {
     <div className="container d-flex align-items-center justify-content-center">
       <div className="text-center">
         <h1>Welcome to the Chat Box</h1>
-        <p>Please log in or register to start chatting.</p>
+        
         <div className="mt-3">
           {auth?.username ? (
-            <>
+            <>            
               <Link className="btn btn-primary" to="/Chat">
-                Chat room
+                Got to chat room
               </Link>
             </>
           ) : (
             <>
+                <p>Please log in or register to start chatting.</p>
               <Link className="btn btn-primary m-3" to="/login">
                 Login
               </Link>

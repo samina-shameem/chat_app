@@ -40,7 +40,8 @@ const Avatar = ({ src }) => {
     // If no src, show a default avatar image
     return (
       <Image
-        src={defaultAvatar}
+        /* src={defaultAvatar} */
+        src="https://i.pravatar.cc/200"
         roundedCircle
         style={{ width: '50px', height: '50px', objectFit: 'cover' }}
         alt="default-avatar"

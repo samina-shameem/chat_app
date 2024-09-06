@@ -71,7 +71,7 @@ const Conversations = () => {
 
       setConversations(
         [
-          { id: "", status: "new conversation" },
+          { id: "", status: "new-conversation" },
           ...uniqueConversations,
         ]
       );
@@ -93,7 +93,7 @@ const Conversations = () => {
           <ConversationItem
             key={conversation.id ? conversation.id : `new-conversation-${uuidv4()}`}
             conversationId={conversation.id}
-            status={conversation.status}
+            status={conversation.status ? conversation.status : "new-conversation"}
           />
         ))}
       </Accordion>

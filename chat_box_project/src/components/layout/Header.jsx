@@ -13,7 +13,7 @@ const Header = () => {
             <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
                 <Nav className="mr-auto">
                     <Nav.Link as={Link} to="/">Home</Nav.Link>
-                    {auth.username ? (
+                    {auth?.username ? (
                         <>
                             <Nav.Link as={Link} to="/chat">Chat</Nav.Link>
                             <Avatar src={auth.avatar} alt={auth.username} />

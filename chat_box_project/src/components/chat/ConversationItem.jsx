@@ -3,7 +3,6 @@ import Accordion from "react-bootstrap/Accordion";
 import Badge from "react-bootstrap/Badge";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import Dropdown from "react-bootstrap/Dropdown";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAuth from "../hooks/useAuth";
 import Avatar from "../profile/Avatar";
@@ -80,7 +79,12 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
     setRefresh((refresh) => !refresh);
   };
 
-  const getContainerStyle = () => {
+  const getHeaderStyle = () => {
+    if (!status) {
+      console.error("status is null");
+      return {};
+    }
+
     switch (status) {
       case "started":
         return { backgroundColor: "#d4edda", justifyContent: "flex-start" }; // Green for "started"
@@ -121,42 +125,63 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
     <Accordion.Item eventKey={conversationId}>
       <Accordion.Header
         onClick={() => setIsActive(!isActive)}
-        style={getContainerStyle()}
+        style={getHeaderStyle()}
       >
         <div
-          className="d-flex"
           style={{
-            justifyContent: "flex-start",
+            display: "flex",
+            alignItems: "center",
             gap: "10px",
             width: "100%",
           }}
         >
-          <span>{status}</span>
-          {Array.from(participants).map((userId) => renderAvatar(userId))}
-          <Dropdown
-            style={{ width: "30px", height: "30px" }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onInviteClick(conversationId);
-            }}
-          >
-            <Dropdown.Toggle
-              variant="secondary"
-              style={{ width: "30px", height: "30px" }}
-            >
-              +
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item
+          {/* For "started" conversations, align to the left */}
+          {status === "started" && (
+            <>
+              <span>{status}</span>
+              {Array.from(participants).map((userId) => renderAvatar(userId))}
+              <div
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  borderRadius: "50%",
+                  backgroundColor: "#ccc",
+                  textAlign: "center",
+                  lineHeight: "30px",
+                }}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent Accordion toggle
+                  onInviteClick(conversationId);
+                }}
+              >
+                +
+              </div>
+            </>
+          )}
+
+          {/* For other statuses, align to the right */}
+          {status !== "started" && (
+            <>
+              <div
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  borderRadius: "50%",
+                  backgroundColor: "#ccc",
+                  textAlign: "center",
+                  lineHeight: "30px",
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onInviteClick(conversationId);
                 }}
               >
-                Invite
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
+                +
+              </div>
+              {Array.from(participants).map((userId) => renderAvatar(userId))}
+              <span>{status}</span>
+            </>
+          )}
         </div>
       </Accordion.Header>
 
@@ -183,9 +208,38 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
               >
                 {message.text}
               </Badge>
+
+              {!isCurrentUser && renderAvatar(message.userId)}
             </div>
           );
         })}
+
+        {/* Input for new message */}
+        <Form className="mt-3 d-flex">
+          <Form.Control
+            type="text"
+            placeholder="Type a message..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            style={{ width: "90%" }}
+          />
+          <Button
+            variant="primary"
+            style={{ width: "10%" }}
+            onClick={handleSendMessage}
+          >
+            Send
+          </Button>
+          {REFRESH_RATE === 0 && (
+            <Button
+              variant="secondary"
+              style={{ width: "10%" }}
+              onClick={handleRefreshClick}
+            >
+              Refresh
+            </Button>
+          )}
+        </Form>
       </Accordion.Body>
     </Accordion.Item>
   );

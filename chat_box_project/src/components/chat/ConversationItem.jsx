@@ -114,7 +114,11 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
       return null;
     }
 
-    return <Avatar src={user.avatar} alt="" />;
+    return user.avatar ? (
+      <Avatar key={userId} src={user.avatar} alt="" />
+    ) : (
+      <Avatar key={userId} src={user.username} alt="" />
+    );
   };
 
   return (
@@ -242,3 +246,4 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
 };
 
 export default ConversationItem;
+

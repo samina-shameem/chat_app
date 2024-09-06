@@ -5,6 +5,7 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAuth from "../hooks/useAuth";
+import Avatar from "../profile/Avatar";
 
 const REFRESH_RATE = 0; // Set to 0 for manual refresh
 const ConversationItem = ({ conversationId, status, onInviteClick }) => {
@@ -97,27 +98,23 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
   };
 
   const renderAvatar = (userId) => {
-    if (!userId) {
-      console.error("userId is null");
+    if (userId === null || userId === undefined) {
+      console.error("userId is null or undefined");
       return null;
     }
 
-    return (
-      <div
-        key={userId}
-        style={{
-          width: "30px",
-          height: "30px",
-          borderRadius: "50%",
-          backgroundColor: "#ccc",
-          textAlign: "center",
-          lineHeight: "30px",
-          margin: "0 10px",
-        }}
-      >
-        {userId}
-      </div>
-    );
+    const user = auth.userList?.find((user) => user.userId === userId);
+    if (!user) {
+      console.error(`User with id ${userId} not found`);
+      return null;
+    }
+
+    if (!user.username) {
+      console.error("User without username");
+      return null;
+    }
+
+    return <Avatar src={user.avatar} alt="" />;
   };
 
   return (

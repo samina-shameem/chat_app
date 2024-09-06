@@ -36,6 +36,7 @@ const Conversations = () => {
 
       const uniqueConversations = [...new Set([...conversationsRes.data])];
       setConversations(uniqueConversations);
+      console.log(uniqueConversations);
     } catch (err) {
       console.error('Error fetching users or conversations', err);
     }
@@ -45,7 +46,7 @@ const Conversations = () => {
     if (auth.username) {
       fetchUserAndConversations();
     }
-  }, [auth.username, axiosPrivate, setUserDetails]);
+  }, [auth.username]);
 
   const handleInviteClick = (conversationId) => {
     setInviteConversationId(conversationId);

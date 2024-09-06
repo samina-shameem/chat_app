@@ -6,6 +6,8 @@ import Button from 'react-bootstrap/Button';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useAuth from '../hooks/useAuth';
 
+const REFRESH_RATE = 0; // Set to 0 for manual refresh
+
 const ConversationItem = ({ conversationId, onInviteClick }) => {
   const axiosPrivate = useAxiosPrivate();
   const { auth } = useAuth();
@@ -17,8 +19,10 @@ const ConversationItem = ({ conversationId, onInviteClick }) => {
   // Fetch messages for this conversation
   useEffect(() => {
     const fetchMessages = async () => {
+        console.log("conversationId:",conversationId);
       try {
         const response = await axiosPrivate.get(`/messages?conversationId=${conversationId}`);
+        console.log(response.data);
         const sortedMessages = response.data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
         // Collect unique participants from messages
@@ -30,13 +34,10 @@ const ConversationItem = ({ conversationId, onInviteClick }) => {
       }
     };
 
-    if (isActive) {
-      const intervalId = setInterval(fetchMessages, 10000); // Active conversation, fetch every 10s
-      return () => clearInterval(intervalId);
-    } else {
-      fetchMessages(); // Inactive, fetch only once
-    }
-  }, [conversationId, isActive, axiosPrivate]);
+    
+    fetchMessages();
+    
+  }, [conversationId, isActive, axiosPrivate, REFRESH_RATE]);
 
   const handleSendMessage = async () => {
     try {
@@ -48,6 +49,10 @@ const ConversationItem = ({ conversationId, onInviteClick }) => {
     } catch (err) {
       console.error('Error sending message', err);
     }
+  };
+
+  const handleRefreshClick = () => {
+    setIsActive((prevIsActive) => !prevIsActive);
   };
 
   const renderAvatar = (userId) => (
@@ -137,6 +142,11 @@ const ConversationItem = ({ conversationId, onInviteClick }) => {
           <Button variant="primary" style={{ width: '10%' }} onClick={handleSendMessage}>
             Send
           </Button>
+          {REFRESH_RATE === 0 && (
+            <Button variant="secondary" style={{ width: '10%' }} onClick={handleRefreshClick}>
+              Refresh
+            </Button>
+          )}
         </Form>
       </Accordion.Body>
     </Accordion.Item>

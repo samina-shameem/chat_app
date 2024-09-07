@@ -6,10 +6,10 @@ import Button from "react-bootstrap/Button";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAuth from "../hooks/useAuth";
 import Avatar from "../profile/Avatar";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
+import { Container, Row, Col } from "react-bootstrap";
 
-const REFRESH_RATE = 0; // Set to 0 for manual refresh, donot remove this if will be set later
-const ConversationItem = ({ conversationId, status, onInviteClick }) => {
+const ConversationItem = ({ conversationId, status, refreshRate,handleInviteClick }) => {
   const axiosPrivate = useAxiosPrivate();
   const { auth } = useAuth();
   const [messages, setMessages] = useState([]);
@@ -18,57 +18,59 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
   const [isActive, setIsActive] = useState(false);
   const [refresh, setRefresh] = useState(false);
 
-  useEffect(() => {
-    let localConversationId = conversationId;
-    if (!localConversationId) {
-      localConversationId = uuidv4();
-      console.info("Conversation ID is empty, assigning a UUID");
-      console.info("Local conversation ID:", localConversationId);
-    }
+  const effectiveConversationId = conversationId || uuidv4();
 
-    const fetchMessages = async () => {
-      if (!axiosPrivate) {
-        console.error("axiosPrivate is null");
+  const fetchMessages = async () => {
+    if (!axiosPrivate) {
+      console.error("axiosPrivate is null");
+      return;
+    }
+    if (!conversationId) {
+      console.info("Empty conversationId");      
+      return;
+    }
+    try {
+      const response = await axiosPrivate.get(
+        `/messages?conversationId=${effectiveConversationId}`
+      );
+      
+      if (!response || !response.data) {
+        console.error("No response or data from message fetch");
+        setMessages([]);
+        setParticipants([]);
         return;
       }
 
-      try {
-        const response = await axiosPrivate.get(
-          `/messages?conversationId=${localConversationId}`
-        );
-        if (!response || !response.data) {
-          console.error("No response or data from message fetch");
-          return;
-        }
+      const sortedMessages = response.data.sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
 
-        const sortedMessages = response.data.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-        );
+      const uniqueParticipants = new Set(
+        sortedMessages.map((message) => message.userId)
+      );
 
-        if (!sortedMessages) {
-          console.error("sortedMessages is null");
-          return;
-        }
-
-        const uniqueParticipants = new Set(
-          sortedMessages.map((message) => message.userId)
-        );
-        setParticipants(uniqueParticipants);
-        setMessages(sortedMessages);
-      } catch (err) {
-        console.error(
-          `Error fetching messages for conversation ${localConversationId}`,
-          err
-        );
-      }
-    };
-
-    if (localConversationId) {
-      fetchMessages();
-    } else {
+      uniqueParticipants.delete(auth.userID);
+      setParticipants(uniqueParticipants);
+      setMessages(sortedMessages);
+    } catch (err) {
+      console.error(
+        `Error fetching messages for conversation ${effectiveConversationId}`,
+        err
+      );
       setMessages([]);
+      setParticipants([]);
     }
-  }, [conversationId, axiosPrivate, refresh]);
+  };
+
+  useEffect(() => {
+    fetchMessages();
+    // Only set up interval if refreshRate is positive
+    if (refreshRate > 0) {
+      console.log("Setting up interval");
+      /* const refreshInterval = setInterval(fetchMessages, refreshRate * 1000);
+      return () => clearInterval(refreshInterval); */
+    }
+  }, [effectiveConversationId, refresh]);
 
   const handleSendMessage = async () => {
     if (!axiosPrivate) {
@@ -79,39 +81,37 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
     try {
       await axiosPrivate.post("/messages", {
         text: newMessage,
-        conversationId: conversationId,
+        conversationId: effectiveConversationId,
       });
       setNewMessage("");
+      // Trigger message fetch after sending a message
+      fetchMessages();
     } catch (err) {
       console.error("Error sending message", err);
     }
   };
 
   const handleRefreshClick = () => {
-    setRefresh((refresh) => !refresh);
+    setRefresh((prevRefresh) => !prevRefresh);
   };
 
-  const getHeaderStyle = () => {
-    if (!status) {
-      console.error("status is null");
-      return {};
-    }
+  
 
+  const getHeaderClassName = () => {
     switch (status) {
       case "started":
-        return { backgroundColor: "#d4edda", justifyContent: "flex-start" }; // Green for "started"
+        return "bg-success text-light";
       case "invited":
-        return { backgroundColor: "#fff3cd", justifyContent: "flex-end" }; // Yellow for "invited"
+        return "bg-warning text-dark";
       case "invited-then-added":
-        return { backgroundColor: "#cce5ff", justifyContent: "flex-end" }; // Blue for "invited-then-added"
+        return "bg-primary text-light";
       default:
-        return {};
+        return "";
     }
   };
 
   const renderAvatar = (userId) => {
     if (userId === null || userId === undefined) {
-      console.error("userId is null or undefined");
       return null;
     }
 
@@ -134,118 +134,73 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
   };
 
   return (
-    <Accordion.Item eventKey={conversationId}>
+    <Accordion.Item eventKey={effectiveConversationId}>
       <Accordion.Header
         onClick={() => setIsActive(!isActive)}
-        style={getHeaderStyle()}
+        className={`d-flex align-items-center gap-2 ${getHeaderClassName()}`}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            width: "100%",
-          }}
-        >
-          {/* For "started" conversations, align to the left */}
-          {status === "started" && (
-            <>
+        <Container fluid>
+          <Row className="align-items-center">
+            <Col className="d-flex align-items-center">
               <span>{status}</span>
               {Array.from(participants).map((userId) => renderAvatar(userId))}
-              <div
-                style={{
-                  width: "30px",
-                  height: "30px",
-                  borderRadius: "50%",
-                  backgroundColor: "#ccc",
-                  textAlign: "center",
-                  lineHeight: "30px",
-                }}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent Accordion toggle
-                  onInviteClick(conversationId);
-                }}
-              >
-                +
-              </div>
-            </>
-          )}
-
-          {/* For other statuses, align to the right */}
-          {status !== "started" && (
-            <>
-              <div
-                style={{
-                  width: "30px",
-                  height: "30px",
-                  borderRadius: "50%",
-                  backgroundColor: "#ccc",
-                  textAlign: "center",
-                  lineHeight: "30px",
-                }}
+              <Button
+                variant="outline-secondary"
+                className="ms-2"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onInviteClick(conversationId);
+                  handleInviteClick(); 
                 }}
               >
                 +
-              </div>
-              {Array.from(participants).map((userId) => renderAvatar(userId))}
-              <span>{status}</span>
-            </>
-          )}
-        </div>
+              </Button>
+            </Col>
+          </Row>
+        </Container>
       </Accordion.Header>
 
       <Accordion.Body>
-        {messages.map((message) => {
-          const isCurrentUser = message.userId === (auth.userID ?? null);
-          return (
-            <div
-              key={message.id}
-              className="d-flex mb-2"
-              style={{
-                justifyContent: isCurrentUser ? "flex-start" : "flex-end",
-              }}
-            >
-              {isCurrentUser && renderAvatar(message.userId)}
-
-              <Badge
-                bg={isCurrentUser ? "primary" : "secondary"}
-                style={{
-                  padding: "10px",
-                  borderRadius: "10px",
-                  maxWidth: "70%",
-                }}
+        {messages.length > 0 ? (
+          messages.map((message) => {
+            const isCurrentUser = message.userId === auth.userID;
+            return (
+              <div
+                key={message.id}
+                className={`d-flex mb-2 ${
+                  isCurrentUser
+                    ? "justify-content-start"
+                    : "justify-content-end"
+                }`}
               >
-                {message.text}
-              </Badge>
+                {renderAvatar(message.userId)}
+                <Badge
+                  bg={isCurrentUser ? "primary" : "secondary"}
+                  className="p-2 rounded-pill"
+                >
+                  {message.text}
+                </Badge>
+              </div>
+            );
+          })
+        ) : (
+          <p>No messages to display</p>
+        )}
 
-              {!isCurrentUser && renderAvatar(message.userId)}
-            </div>
-          );
-        })}
-
-        {/* Input for new message */}
         <Form className="mt-3 d-flex">
           <Form.Control
             type="text"
             placeholder="Type a message..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            style={{ width: "90%" }}
+            className="me-2"
           />
-          <Button
-            variant="primary"
-            style={{ width: "10%" }}
-            onClick={handleSendMessage}
-          >
+          <Button variant="primary" onClick={handleSendMessage}>
             Send
           </Button>
-          {REFRESH_RATE === 0 && (
+          {refreshRate === 0 && (
             <Button
               variant="secondary"
-              style={{ width: "10%" }}
+              className="ms-2"
               onClick={handleRefreshClick}
             >
               Refresh
@@ -258,4 +213,3 @@ const ConversationItem = ({ conversationId, status, onInviteClick }) => {
 };
 
 export default ConversationItem;
-

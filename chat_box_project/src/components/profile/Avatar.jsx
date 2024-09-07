@@ -32,7 +32,7 @@ const Avatar = ({ src }) => {
             color: '#fff',
           }}
         >
-          {src.charAt(0).toUpperCase()}
+          {src.charAt(0).match(/[a-z]/i) ? src.charAt(0).toUpperCase() : src.charAt(0)}
         </div>
       );
     }

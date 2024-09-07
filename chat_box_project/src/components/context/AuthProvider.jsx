@@ -13,7 +13,8 @@ export const AuthProvider = ({ children }) => {
       password: "",
       accessToken: "",
       userID: "",
-      avatar: ""
+      avatar: "",
+      userList: []
     };
   });
 

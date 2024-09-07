@@ -8,8 +8,13 @@ import { v4 as uuidv4 } from 'uuid';
 const Conversations = () => {
   const axiosPrivate = useAxiosPrivate();
   const [conversations, setConversations] = useState([{}]);
+  const [clickedConversationID, setClickedConversationID] = useState();
   const { auth, setUserDetails } = useAuth();
 
+
+  const handleInviteClick = (clickedConversationId) => {
+    setClickedConversationID(clickedConversationId);
+  };
   const fetchUserAndConversations = async () => {
     try {
       if (!auth.username) {
@@ -90,7 +95,7 @@ const Conversations = () => {
     if (auth.username) {
       fetchUserAndConversations();
     }
-  }, [auth.username, axiosPrivate]);
+  }, [auth.username]);
 
   return (
     <>
@@ -100,9 +105,12 @@ const Conversations = () => {
             key={conversation.id ? conversation.id : `new-conversation-${uuidv4()}`}
             conversationId={conversation.id}
             status={conversation.status ? conversation.status : "new-conversation"}
+            refreshRate={0}
+            handleInviteClick={handleInviteClick(conversation.id)}
           />
         ))}
       </Accordion>
+      {clickedConversationID && InviteModal(clickedConversationID)}
     </>
   );
 };

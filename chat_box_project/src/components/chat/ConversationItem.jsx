@@ -8,7 +8,6 @@ import useAuth from "../hooks/useAuth";
 import Avatar from "../profile/Avatar";
 import { v4 as uuidv4 } from "uuid";
 import { Container, Row, Col } from "react-bootstrap";
-import InvitePopover from "./InvitePopover";
 import InviteUsers from "./InviteUsers";
 
 const ConversationItem = ({ conversationId, status, refreshRate }) => {

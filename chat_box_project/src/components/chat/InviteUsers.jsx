@@ -5,31 +5,34 @@ import Form from "react-bootstrap/Form";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import useAuth from "../hooks/useAuth";
 import Avatar from "../profile/Avatar";
-import { Container } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { FixedSizeList as List } from "react-window";
 
 const InviteUsers = ({ conversationId }) => {
   const { auth } = useAuth();
   const [show, setShow] = useState(false);
   const axiosPrivate = useAxiosPrivate();
-  const [selectedUsers, setSelectedUsers] = useState([]);
-  const [unSelectedUsers, setUnSelectedUsers] = useState(auth.userList || []);
+  const [selectedUserIds, setSelectedUserIds] = useState([]);
+  const [unSelectedUserIds, setUnSelectedUserIds] = useState(
+    auth.userList
+      ? auth.userList
+          .sort((a, b) => a.username.localeCompare(b.username))
+          .map((user) => user.userId)
+      : []
+  );
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-  const handleUserSelect = (userId) => {
-    setSelectedUsers((prevSelectedUsers) => {
-      if (prevSelectedUsers.includes(userId)) {
-        return prevSelectedUsers.filter((id) => id !== userId);
-      }
-      return [...prevSelectedUsers, userId];
-    });
+  const handleClose = () => {
+    console.log("Closing invite users modal",conversationId);
+    setShow(false);
+  };
+  const handleShow = () => {
+    console.log("Showing invite users modal",conversationId);
+    setShow(true);
   };
 
   const handleInvite = async () => {
     try {
-      for (const userId of selectedUsers) {
+      for (const userId of selectedUserIds) {
         await axiosPrivate.post(`/invite/${userId}`, {
           conversationId,
         });
@@ -41,27 +44,29 @@ const InviteUsers = ({ conversationId }) => {
   };
 
   const handleUnSelectUser = (userId) => {
-    setSelectedUsers((prevSelectedUsers) =>
-      prevSelectedUsers.filter((id) => id !== userId)
+    setSelectedUserIds((prevSelectedUserIds) =>
+      prevSelectedUserIds.filter((id) => id !== userId)
     );
-    setUnSelectedUsers((prevUnSelectedUsers) => [
-      ...prevUnSelectedUsers,
+    setUnSelectedUserIds((prevUnSelectedUserIds) => [
+      ...prevUnSelectedUserIds,
       userId,
     ]);
   };
 
   const handleSelectUser = (userId) => {
-    setSelectedUsers((prevSelectedUsers) => [
-      ...prevSelectedUsers,
+    setSelectedUserIds((prevSelectedUserIds) => [
+      ...prevSelectedUserIds,
       userId,
     ]);
-    setUnSelectedUsers((prevUnSelectedUsers) =>
-      prevUnSelectedUsers.filter((id) => id !== userId)
+    setUnSelectedUserIds((prevUnSelectedUserIds) =>
+      prevUnSelectedUserIds.filter((id) => id !== userId)
     );
   };
 
   const getRowsSelected = ({ index, style }) => {
-    const user = auth.userList.find((u) => u.userId === selectedUsers[index]);
+    const user = auth.userList.find(
+      (u) => u.userId === selectedUserIds[index]
+    );
     if (!user) return null;
     return (
       <Container style={style} key={user.userId} className="d-flex align-items-center">
@@ -70,14 +75,18 @@ const InviteUsers = ({ conversationId }) => {
         ) : (
           <Avatar src={user.username} alt="" />
         )}
-        {user.username}
-        <Button onClick={() => handleUnSelectUser(user.userId)}> - </Button>
+        <Form.Label>{user.username}</Form.Label>
+        <Button variant="link" onClick={() => handleUnSelectUser(user.userId)}>
+          Remove
+        </Button>
       </Container>
     );
   };
 
   const getRowsUnSelected = ({ index, style }) => {
-    const user = auth.userList.find((u) => u.userId === unSelectedUsers[index]);
+    const user = auth.userList.find(
+      (u) => u.userId === unSelectedUserIds[index]
+    );
     if (!user) return null;
     return (
       <Container style={style} key={user.userId} className="d-flex align-items-center">
@@ -86,15 +95,17 @@ const InviteUsers = ({ conversationId }) => {
         ) : (
           <Avatar src={user.username} alt="" />
         )}
-        {user.username}
-        <Button onClick={() => handleSelectUser(user.userId)}> + </Button>
+        <Form.Label>{user.username}</Form.Label>
+        <Button variant="primary" onClick={() => handleSelectUser(user.userId)}>
+          Add
+        </Button>
       </Container>
     );
   };
 
   return (
     <>
-      <Button variant="primary" onClick={handleShow}>
+      <Button variant="primary" onClick={handleShow} className="m-2">
         +
       </Button>
       <Modal show={show} onHide={handleClose}>
@@ -105,7 +116,7 @@ const InviteUsers = ({ conversationId }) => {
           {/* Selected Users from which we can unselect */}
           <List
             height={400}
-            itemCount={selectedUsers.length}
+            itemCount={selectedUserIds.length}
             itemSize={50}
             width="100%"
           >
@@ -114,7 +125,7 @@ const InviteUsers = ({ conversationId }) => {
           {/* Unselected Users from which we can select */}
           <List
             height={400}
-            itemCount={unSelectedUsers.length}
+            itemCount={unSelectedUserIds.length}
             itemSize={50}
             width="100%"
           >

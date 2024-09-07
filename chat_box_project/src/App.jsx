@@ -24,12 +24,12 @@ function App() {
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="unauthorized" element={<Unauthorized />} />       
-        
+                
         {/* we want to protect these routes */}
         <Route element={<RequireAuth />}>
           <Route path="/chat" element={<Chat />} />        
           <Route path="/dashboard" element={<Dashboard />} />                  
-          <Route path="/profile" element={<Profile />} />                  
+          <Route path="/profile" element={<Profile />} />                            
         </Route>
 
         {/* catch all */}

@@ -60,9 +60,9 @@ After ensuring the API works as expected, it's time to create a React app that i
 - [TODO] The user should be able to delete existing messages.
 
 **SideNav.jsx:**
-- [TODO] Display via a side navigation, see this example: https://t.ly/PFbQq.
+- [x] Display via a side navigation, see this example: https://t.ly/PFbQq.
   - Tips: https://t.ly/iaWJa
-- [TODO] Only show a logout button that logs out, clears the token, and redirects to the Login page.
+- [x] Only show a logout button that logs out, clears the token, and redirects to the Login page.
 
 **General:**
 - [TODO] You need to host the app on Netlify. Change the site name to something you like. This is to practice hosting and avoid CORS issues, as I've configured the server to whitelist Netlify. 😏
@@ -90,7 +90,7 @@ After ensuring the API works as expected, it's time to create a React app that i
   - Swagger: https://chatify-api.up.railway.app/api-docs/#/Messages/get_messages
 
 **Profile.jsx:**
-- [TODO] Should be the first menu option on a SideNav along with a logout button.
+- [x] Should be the first menu option on a SideNav along with a logout button.
 - [TODO] The user should be able to update their username, email, and avatar*.
 - [TODO] The user should be able to delete their account and receive clear feedback/warnings about what they are attempting to do. Upon successful deletion, the user should be logged out and redirected to Login.jsx.
 

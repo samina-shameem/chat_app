@@ -15,7 +15,7 @@ const Header = () => {
         <Nav className="mr-auto ">
           {auth?.username ? (
             <>
-              <Nav.Link as={Link} to="/profile" className="p-4 mr-3"> {auth?.username}</Nav.Link> //link to profile page
+              <Nav.Link as={Link} to="/profile" className="p-4 mr-3"> {auth?.username}</Nav.Link>
               <Avatar
                 className="p-4 mr-3"
                 src={auth.avatar}

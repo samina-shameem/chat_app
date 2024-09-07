@@ -91,7 +91,7 @@ After ensuring the API works as expected, it's time to create a React app that i
 
 **Profile.jsx:**
 - [x] Should be the first menu option on a SideNav along with a logout button.
-- [TODO] The user should be able to update their username, email, and avatar*.
+- [x] The user should be able to update their username, email, and avatar*.
 - [TODO] The user should be able to delete their account and receive clear feedback/warnings about what they are attempting to do. Upon successful deletion, the user should be logged out and redirected to Login.jsx.
 
 *If the avatar is changed, a preview should be shown after the new URL is entered (can be after a button press or debounced in the input field) OR the user can take their own picture, see https://www.npmjs.com/package/react-webcam, and the image should be hosted somewhere – use a service with an API, e.g., https://freeimage.host/page/api?lang=en, and then the URL should be updated in the avatar column in the database.

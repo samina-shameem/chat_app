@@ -4,17 +4,24 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import ConversationItem from "./ConversationItem";
 import useAuth from "../hooks/useAuth";
 import { v4 as uuidv4 } from 'uuid';
-// Define userService to fetch user info
+import InviteModal from "./InviteModal"; // Make sure you import InviteModal
+
 const Conversations = () => {
   const axiosPrivate = useAxiosPrivate();
   const [conversations, setConversations] = useState([{}]);
   const [clickedConversationID, setClickedConversationID] = useState();
   const { auth, setUserDetails } = useAuth();
-
+  const [modalVisible, setModalVisible] = useState(false);
 
   const handleInviteClick = (clickedConversationId) => {
     setClickedConversationID(clickedConversationId);
+    setModalVisible(true);
   };
+
+  const closeModal = () => {
+    setModalVisible(false);
+  };
+
   const fetchUserAndConversations = async () => {
     try {
       if (!auth.username) {
@@ -42,7 +49,6 @@ const Conversations = () => {
         userList,
       });
 
-      // Fetch invited conversations
       const userDetailsRes = await axiosPrivate.get( "/users/" + currentUser.userId);
       const invitedConversationsData = userDetailsRes.data[0]?.invite;
       const invitedConversationsArray = invitedConversationsData
@@ -52,12 +58,9 @@ const Conversations = () => {
         (invite) => invite.conversationId
       );
 
-      // Fetch all conversations(including self, without invited and started)
       const allMessagesRes = await axiosPrivate.get( "/messages");
       const allMessagesConversationIds = allMessagesRes.data.map(message => message.conversationId);
 
-
-      // Combine and deduplicate conversations
       const allConversations = new Set([
         ...allMessagesConversationIds,
         ...conversationsByThisUser,
@@ -65,7 +68,7 @@ const Conversations = () => {
       ]);
       const uniqueConversations = Array.from(allConversations).map(
         (conversationId) => {
-          let status = "self"; // Default to self if conversationId is not found in other arrays
+          let status = "self";
           if (
             conversationsByThisUser.includes(conversationId) &&
             invitedConversationsIds.includes(conversationId)
@@ -106,15 +109,19 @@ const Conversations = () => {
             conversationId={conversation.id}
             status={conversation.status ? conversation.status : "new-conversation"}
             refreshRate={0}
-            handleInviteClick={handleInviteClick(conversation.id)}
+            handleInviteClick={() => handleInviteClick(conversation.id ? conversation.id : `${uuidv4()}`)} 
           />
         ))}
       </Accordion>
-      {clickedConversationID && InviteModal(clickedConversationID)}
+      {clickedConversationID && (
+        <InviteModal
+          conversationId={clickedConversationID}
+          show={modalVisible}
+          onHide={closeModal}  // Modal visibility control added
+        />
+      )}
     </>
   );
 };
 
 export default Conversations;
-
-

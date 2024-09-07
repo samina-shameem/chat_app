@@ -1,51 +1,59 @@
-import React, { useState } from 'react';
-import { Modal, Button, Form, Container } from 'react-bootstrap';
+import React, { useEffect, useState } from "react";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
-import Avatar from '../profile/Avatar';
+import useAuth from "../hooks/useAuth";
+import Avatar from "../profile/Avatar";
+import { Container } from "react-bootstrap";
 
-const InviteModal = ({ conversationId }) => {
+const InviteModal = ({ conversationId, show, onHide }) => {
+  const { auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const { auth } = useAuth();
 
   const handleUserSelect = (userId) => {
-    setSelectedUsers((prevSelected) =>
-      prevSelected.includes(userId)
-        ? prevSelected.filter(id => id !== userId)
-        : [...prevSelected, userId]
-    );
+    setSelectedUsers((prevSelectedUsers) => {
+      if (prevSelectedUsers.includes(userId)) {
+        return prevSelectedUsers.filter((id) => id !== userId);
+      }
+      return [...prevSelectedUsers, userId];
+    });
   };
 
   const handleInvite = async () => {
     try {
-      await Promise.all(selectedUsers.map(userId =>
-        axiosPrivate.post(`/invite/${userId}`, { conversationId })
-      ));
-      alert('Users invited successfully');
-      onHide(); // Close the modal after inviting
+      for (const userId of selectedUsers) {
+        await axiosPrivate.post(`/invite/${userId}`, {
+          conversationId,
+        });
+      }
+      onHide();
     } catch (err) {
       console.error("Error inviting users", err);
     }
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="lg">
+    <Modal show={show} onHide={onHide}>
       <Modal.Header closeButton>
-        <Modal.Title>User List</Modal.Title>
+        <Modal.Title>Invite Users</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {auth.userList.map(user => (
+        {auth.userList
+          ?.sort((a, b) => a.username.localeCompare(b.username))
+          .map((user) => (
           <Form.Check
             key={user.userId}
             type="checkbox"
             id={`user-${user.userId}`}
             label={
               <Container className="d-flex align-items-center">
-                user.avatar ? (
-      <Avatar src={user.avatar} alt="" />
-    ) : (
-      <Avatar src={user.username} alt="" />
-    );
+                {user.avatar ? (
+                  <Avatar src={user.avatar} alt="" />
+                ) : (
+                  <Avatar src={user.username} alt="" />
+                )}
                 {user.username}
               </Container>
             }

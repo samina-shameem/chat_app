@@ -37,7 +37,7 @@ const useAxiosPrivate = () => {
   // List of endpoints that require CSRF token
   const csrfEndpoints = ["/auth/register", "/auth/token"];
   // List of endpoints that require JWT
-  const jwtEndpoints = ["/messages", "/users", "/user", "/conversations"];
+  const jwtEndpoints = ["/messages", "/users", "/user", "/conversations", "/invite"];
   useEffect(() => {
     const requestIntercept = axiosPrivate.interceptors.request.use(
       async (config) => {

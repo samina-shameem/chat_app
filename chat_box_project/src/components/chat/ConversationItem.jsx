@@ -9,7 +9,7 @@ import Avatar from "../profile/Avatar";
 import { v4 as uuidv4 } from "uuid";
 import { Container, Row, Col } from "react-bootstrap";
 
-const ConversationItem = ({ conversationId, status, refreshRate,handleInviteClick }) => {
+const ConversationItem = ({ conversationId, status, refreshRate, handleInviteClick }) => {
   const axiosPrivate = useAxiosPrivate();
   const { auth } = useAuth();
   const [messages, setMessages] = useState([]);
@@ -33,7 +33,7 @@ const ConversationItem = ({ conversationId, status, refreshRate,handleInviteClic
       const response = await axiosPrivate.get(
         `/messages?conversationId=${effectiveConversationId}`
       );
-      
+
       if (!response || !response.data) {
         console.error("No response or data from message fetch");
         setMessages([]);
@@ -64,11 +64,9 @@ const ConversationItem = ({ conversationId, status, refreshRate,handleInviteClic
 
   useEffect(() => {
     fetchMessages();
-    // Only set up interval if refreshRate is positive
     if (refreshRate > 0) {
-      console.log("Setting up interval");
-      /* const refreshInterval = setInterval(fetchMessages, refreshRate * 1000);
-      return () => clearInterval(refreshInterval); */
+      const refreshInterval = setInterval(fetchMessages, refreshRate * 1000);
+      return () => clearInterval(refreshInterval);
     }
   }, [effectiveConversationId, refresh]);
 
@@ -84,7 +82,6 @@ const ConversationItem = ({ conversationId, status, refreshRate,handleInviteClic
         conversationId: effectiveConversationId,
       });
       setNewMessage("");
-      // Trigger message fetch after sending a message
       fetchMessages();
     } catch (err) {
       console.error("Error sending message", err);
@@ -94,8 +91,6 @@ const ConversationItem = ({ conversationId, status, refreshRate,handleInviteClic
   const handleRefreshClick = () => {
     setRefresh((prevRefresh) => !prevRefresh);
   };
-
-  
 
   const getHeaderClassName = () => {
     switch (status) {
@@ -111,20 +106,10 @@ const ConversationItem = ({ conversationId, status, refreshRate,handleInviteClic
   };
 
   const renderAvatar = (userId) => {
-    if (userId === null || userId === undefined) {
-      return null;
-    }
+    if (!userId) return null;
 
     const user = auth.userList?.find((user) => user.userId === userId);
-    if (!user) {
-      console.error(`User with id ${userId} not found`);
-      return null;
-    }
-
-    if (!user.username) {
-      console.error("User without username");
-      return null;
-    }
+    if (!user) return null;
 
     return user.avatar ? (
       <Avatar key={userId} src={user.avatar} alt="" />
@@ -149,7 +134,7 @@ const ConversationItem = ({ conversationId, status, refreshRate,handleInviteClic
                 className="ms-2"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleInviteClick(); 
+                  handleInviteClick();
                 }}
               >
                 +

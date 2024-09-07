@@ -19,14 +19,25 @@ const ConversationItem = ({ conversationId, status, refreshRate, handleInviteCli
   const [refresh, setRefresh] = useState(false);
 
   const effectiveConversationId = conversationId || uuidv4();
-
-  const fetchMessages = async () => {
+  console.info("********************************************"); 
+  console.log(effectiveConversationId);
+  console.log(messages)
+  console.log(conversationId)
+  console.info("********************************************"); 
+  const fetchMessages = async () => {   
     if (!axiosPrivate) {
       console.error("axiosPrivate is null");
       return;
     }
-    if (!conversationId) {
-      console.info("Empty conversationId");      
+    console.info("===================================="); 
+    console.info(conversationId); 
+    console.info(status); 
+    console.info(effectiveConversationId);
+    console.info(messages);
+    console.info("===================================="); 
+    if (!effectiveConversationId) {
+      console.info("Empty conversationId",status);  
+      setMessages([]);          
       return;
     }
     try {
@@ -68,7 +79,7 @@ const ConversationItem = ({ conversationId, status, refreshRate, handleInviteCli
       const refreshInterval = setInterval(fetchMessages, refreshRate * 1000);
       return () => clearInterval(refreshInterval);
     }
-  }, [effectiveConversationId, refresh]);
+  }, [conversationId, refresh]);
 
   const handleSendMessage = async () => {
     if (!axiosPrivate) {
@@ -101,7 +112,7 @@ const ConversationItem = ({ conversationId, status, refreshRate, handleInviteCli
       case "invited-then-added":
         return "bg-primary text-light";
       default:
-        return "";
+        return "bg-success text-light";
     }
   };
 
@@ -137,7 +148,7 @@ const ConversationItem = ({ conversationId, status, refreshRate, handleInviteCli
                   handleInviteClick();
                 }}
               >
-                +
+                + {effectiveConversationId}
               </Button>
             </Col>
           </Row>
@@ -145,7 +156,8 @@ const ConversationItem = ({ conversationId, status, refreshRate, handleInviteCli
       </Accordion.Header>
 
       <Accordion.Body>
-        {messages.length > 0 ? (
+      <p>Messages</p>
+        {messages?.length > 0 ? (
           messages.map((message) => {
             const isCurrentUser = message.userId === auth.userID;
             return (

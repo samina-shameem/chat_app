@@ -13,6 +13,7 @@ import RequireAuth from './components/auth/RequireAuth';
 import Chat from './components/pages/Chat';
 import Dashboard from './components/pages/Dashboard';
 import LogoutButton from './components/pages/LogoutButton';
+import Profile from './components/profile/Profile';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route element={<RequireAuth />}>
           <Route path="/chat" element={<Chat />} />        
           <Route path="/dashboard" element={<Dashboard />} />                  
+          <Route path="/profile" element={<Profile />} />                  
         </Route>
 
         {/* catch all */}

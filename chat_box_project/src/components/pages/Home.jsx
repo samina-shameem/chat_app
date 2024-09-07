@@ -13,7 +13,7 @@ function Home() {
           {auth?.username ? (
             <>            
               <Link className="btn btn-primary" to="/Chat">
-                Got to chat room
+                Goto chat room
               </Link>
             </>
           ) : (

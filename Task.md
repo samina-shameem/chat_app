@@ -53,9 +53,9 @@ After ensuring the API works as expected, it's time to create a React app that i
 
 **Chat.jsx:**
 - [x] Display all messages.
-- [TODO] All messages belonging to the logged-in user should be displayed on the right side.
-- [TODO] All other messages should be displayed on the left side.
-- [TODO] The user should be able to create new messages.
+- [x] All messages belonging to the logged-in user should be displayed on the right side.
+- [x] All other messages should be displayed on the left side.
+- [x] The user should be able to create new messages.
   - [TODO] Sanitize the content in some way.
 - [TODO] The user should be able to delete existing messages.
 

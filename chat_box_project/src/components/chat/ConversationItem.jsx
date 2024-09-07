@@ -8,8 +8,10 @@ import useAuth from "../hooks/useAuth";
 import Avatar from "../profile/Avatar";
 import { v4 as uuidv4 } from "uuid";
 import { Container, Row, Col } from "react-bootstrap";
+import InvitePopover from "./InvitePopover";
+import InviteUsers from "./InviteUsers";
 
-const ConversationItem = ({ conversationId, status, refreshRate, handleInviteClick }) => {
+const ConversationItem = ({ conversationId, status, refreshRate }) => {
   const axiosPrivate = useAxiosPrivate();
   const { auth } = useAuth();
   const [messages, setMessages] = useState([]);
@@ -55,11 +57,9 @@ const ConversationItem = ({ conversationId, status, refreshRate, handleInviteCli
       const sortedMessages = response.data.sort(
         (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
       );
-
       const uniqueParticipants = new Set(
         sortedMessages.map((message) => message.userId)
       );
-
       uniqueParticipants.delete(auth.userID);
       setParticipants(uniqueParticipants);
       setMessages(sortedMessages);
@@ -82,11 +82,6 @@ const ConversationItem = ({ conversationId, status, refreshRate, handleInviteCli
   }, [conversationId, refresh]);
 
   const handleSendMessage = async () => {
-    if (!axiosPrivate) {
-      console.error("axiosPrivate is null");
-      return;
-    }
-
     try {
       await axiosPrivate.post("/messages", {
         text: newMessage,
@@ -118,10 +113,8 @@ const ConversationItem = ({ conversationId, status, refreshRate, handleInviteCli
 
   const renderAvatar = (userId) => {
     if (!userId) return null;
-
     const user = auth.userList?.find((user) => user.userId === userId);
     if (!user) return null;
-
     return user.avatar ? (
       <Avatar key={userId} src={user.avatar} alt="" />
     ) : (
@@ -140,16 +133,6 @@ const ConversationItem = ({ conversationId, status, refreshRate, handleInviteCli
             <Col className="d-flex align-items-center">
               <span>{status}</span>
               {Array.from(participants).map((userId) => renderAvatar(userId))}
-              <Button
-                variant="outline-secondary"
-                className="ms-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleInviteClick();
-                }}
-              >
-                + {effectiveConversationId}
-              </Button>
             </Col>
           </Row>
         </Container>
@@ -184,6 +167,7 @@ const ConversationItem = ({ conversationId, status, refreshRate, handleInviteCli
         )}
 
         <Form className="mt-3 d-flex">
+          <InviteUsers conversationId={effectiveConversationId}/>
           <Form.Control
             type="text"
             placeholder="Type a message..."

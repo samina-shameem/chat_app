@@ -4,23 +4,15 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import ConversationItem from "./ConversationItem";
 import useAuth from "../hooks/useAuth";
 import { v4 as uuidv4 } from 'uuid';
-import InviteModal from "./InviteModal"; // Make sure you import InviteModal
+import InviteModal from "./InviteUsers"; // Make sure you import InviteModal
 
 const Conversations = () => {
   const axiosPrivate = useAxiosPrivate();
   const [conversations, setConversations] = useState([{}]);
   const [clickedConversationID, setClickedConversationID] = useState();
   const { auth, setUserDetails } = useAuth();
-  const [modalVisible, setModalVisible] = useState(false);
 
-  const handleInviteClick = (clickedConversationId) => {
-    setClickedConversationID(clickedConversationId);
-    setModalVisible(true);
-  };
 
-  const closeModal = () => {
-    setModalVisible(false);
-  };
 
   const fetchUserAndConversations = async () => {
     try {
@@ -85,7 +77,7 @@ const Conversations = () => {
 
       setConversations(
         [
-          { id: "", status: "new-conversation" },
+          /* { id: "", status: "new-conversation" }, */
           ...uniqueConversations,
         ]
       );
@@ -108,18 +100,10 @@ const Conversations = () => {
             key={conversation.id ? conversation.id : `new-conversation-${uuidv4()}`}
             conversationId={conversation.id}
             status={conversation.status ? conversation.status : "new-conversation"}
-            refreshRate={0}
-            handleInviteClick={() => handleInviteClick(conversation.id ? conversation.id : `${uuidv4()}`)} 
+            refreshRate={0}            
           />
         ))}
       </Accordion>
-      {clickedConversationID && (
-        <InviteModal
-          conversationId={clickedConversationID}
-          show={modalVisible}
-          onHide={closeModal}  // Modal visibility control added
-        />
-      )}
     </>
   );
 };

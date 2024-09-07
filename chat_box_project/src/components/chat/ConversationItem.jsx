@@ -195,6 +195,7 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
           <p className="mt-3">No messages to display</p>
         )}
         <Form className="mt-3 d-flex">
+          <InviteUsers conversationId={effectiveConversationId}/>
           <Form.Control
             type="text"
             placeholder="Type a message..."

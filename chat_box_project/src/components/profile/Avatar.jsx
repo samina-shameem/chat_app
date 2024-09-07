@@ -20,7 +20,7 @@ const Avatar = ({ src }) => {
 
       // If src is text, return the first letter
       return (
-        <Container
+        <div
           style={{
             width: '50px',
             height: '50px',
@@ -34,7 +34,7 @@ const Avatar = ({ src }) => {
           }}
         >
           {src.charAt(0).match(/[a-z]/i) ? src.charAt(0).toUpperCase() : src.charAt(0)}
-        </Container>
+        </div>
       );
     }
 

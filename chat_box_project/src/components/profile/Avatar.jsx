@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'react-bootstrap/Image';
 import defaultAvatar from '../../assets/images/defaultAvatar.jpeg';
+import { Container } from 'react-bootstrap';
 
 const Avatar = ({ src }) => {
   const getAvatarContent = () => {
@@ -19,7 +20,7 @@ const Avatar = ({ src }) => {
 
       // If src is text, return the first letter
       return (
-        <div
+        <Container
           style={{
             width: '50px',
             height: '50px',
@@ -33,7 +34,7 @@ const Avatar = ({ src }) => {
           }}
         >
           {src.charAt(0).match(/[a-z]/i) ? src.charAt(0).toUpperCase() : src.charAt(0)}
-        </div>
+        </Container>
       );
     }
 

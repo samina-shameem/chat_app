@@ -138,51 +138,80 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
       </Accordion.Header>
 
       <Accordion.Body>
-      <p>Messages</p>
-        {messages?.length > 0 ? (
+        {messages.length > 0 ? (
           messages.map((message) => {
-            const isCurrentUser = message.userId === auth.userID;
+            const isCurrentUsersMessage = message?.userId === auth?.userID;
             return (
-              <div
-                key={message.id}
-                className={`d-flex mb-2 ${
-                  isCurrentUser
-                    ? "justify-content-start"
-                    : "justify-content-end"
-                }`}
-              >
-                {renderAvatar(message.userId)}
-                <Badge
-                  bg={isCurrentUser ? "primary" : "secondary"}
-                  className="p-2 rounded-pill"
-                >
-                  {message.text}
-                </Badge>
-              </div>
+              isCurrentUsersMessage ? (
+                <Container key={message?.id} className="d-flex justify-content-start">
+                  <Row>
+                    <Col>
+                      {renderAvatar(message?.userId)}
+                    </Col>
+                    <Col>
+                      <Badge
+                        style={{             
+                          minWidth: "75px", 
+                          minHeight: "50px", 
+                          display: "flex", 
+                          alignItems: "center", 
+                          justifyContent: "center",                                                    
+                        }}
+                        bg="primary"                        
+                        pill
+                      >
+                        {message?.text || "(empty message)"}
+                      </Badge>
+                    </Col>
+                  </Row>
+                </Container>
+              ) : (
+                <Container key={message?.id} className="d-flex justify-content-end">
+                  <Row>
+                    <Col>
+                      <Badge
+                        style={{ 
+                          minWidth: "75px", 
+                          minHeight: "50px", 
+                          display: "flex", 
+                          alignItems: "center", 
+                          justifyContent: "center" 
+                        }}
+                        bg="secondary"
+                        pill
+                      >
+                        {message?.text || "(empty message)"}
+                      </Badge>
+                    </Col>
+                    <Col >
+                      {renderAvatar(message?.userId)}
+                    </Col>
+                  </Row>
+                </Container>
+              )
             );
           })
         ) : (
-          <p>No messages to display</p>
+          <p className="mt-3">No messages to display</p>
         )}
-
         <Form className="mt-3 d-flex">
-          <InviteUsers conversationId={effectiveConversationId}/>
           <Form.Control
             type="text"
             placeholder="Type a message..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            className="me-2"
+            className="me-2 flex-grow-1"
           />
-          <Button variant="primary" onClick={handleSendMessage}>
+          <Button
+            variant="primary"
+            onClick={handleSendMessage}
+            className="me-2"
+            disabled={!newMessage.trim()}
+          >
             Send
           </Button>
           {refreshRate === 0 && (
-            <Button
-              variant="secondary"
-              className="ms-2"
-              onClick={handleRefreshClick}
-            >
+            <Button variant="secondary" onClick={handleRefreshClick}>
               Refresh
             </Button>
           )}
@@ -193,3 +222,5 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
 };
 
 export default ConversationItem;
+
+

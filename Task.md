@@ -52,7 +52,7 @@ After ensuring the API works as expected, it's time to create a React app that i
 - [x] Redirect to "Chat.jsx" upon successful login.
 
 **Chat.jsx:**
-- [TODO] Display all messages.
+- [x] Display all messages.
 - [TODO] All messages belonging to the logged-in user should be displayed on the right side.
 - [TODO] All other messages should be displayed on the left side.
 - [TODO] The user should be able to create new messages.

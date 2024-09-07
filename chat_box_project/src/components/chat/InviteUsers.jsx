@@ -34,6 +34,12 @@ const InviteUsers = ({ conversationId }) => {
     setShow(true);
   };
 
+  const handleShowLog = () => {
+    console.log("conversationId:",conversationId);
+    console.log("selectedUserIds:",selectedUserIds);
+    console.log("unSelectedUserIds:",unSelectedUserIds);  
+  };
+
   const handleInvite = async () => {
     try {
       for (const userId of selectedUserIds) {
@@ -49,22 +55,50 @@ const InviteUsers = ({ conversationId }) => {
 
   const handleUnSelectUser = (userId) => {
     setSelectedUserIds((prevSelectedUserIds) =>
-      prevSelectedUserIds.filter((id) => id !== userId)
+      prevSelectedUserIds
+        .filter((id) => id !== userId)
+        .sort((a, b) => {
+          const userA = auth.userList.find((user) => user.userId === a);
+          const userB = auth.userList.find((user) => user.userId === b);
+          return userA.username.localeCompare(userB.username);
+        })
     );
     setUnSelectedUserIds((prevUnSelectedUserIds) => [
       ...prevUnSelectedUserIds,
       userId,
-    ]);
+    ].sort((a, b) => {
+      const userA = auth.userList.find((user) => user.userId === a);
+      const userB = auth.userList.find((user) => user.userId === b);
+      return userA.username.localeCompare(userB.username);
+    }));
+    console.log("handleUnSelectUser");
+    console.log("conversationId:",conversationId);
+    console.log("selectedUserIds:",selectedUserIds);
+    console.log("unSelectedUserIds:",unSelectedUserIds);
+
   };
 
   const handleSelectUser = (userId) => {
-    setSelectedUserIds((prevSelectedUserIds) => [
-      ...prevSelectedUserIds,
-      userId,
-    ]);
-    setUnSelectedUserIds((prevUnSelectedUserIds) =>
-      prevUnSelectedUserIds.filter((id) => id !== userId)
-    );
+    setSelectedUserIds((prevSelectedUserIds) => {
+      const newSelectedUserIds = [...prevSelectedUserIds, userId];
+      return newSelectedUserIds.sort((a, b) => {
+        const userA = auth.userList.find((user) => user.userId === a);
+        const userB = auth.userList.find((user) => user.userId === b);
+        return userA.username.localeCompare(userB.username);
+      });
+    });
+    setUnSelectedUserIds((prevUnSelectedUserIds) => {
+      const newUnSelectedUserIds = prevUnSelectedUserIds.filter((id) => id !== userId);
+      return newUnSelectedUserIds.sort((a, b) => {
+        const userA = auth.userList.find((user) => user.userId === a);
+        const userB = auth.userList.find((user) => user.userId === b);
+        return userA.username.localeCompare(userB.username);
+      });
+    });
+    console.log("handleSelectUser");
+    console.log("conversationId:",conversationId);
+    console.log("selectedUserIds:",selectedUserIds);
+    console.log("unSelectedUserIds:",unSelectedUserIds);
   };
 
   const getRowsSelected = ({ index, style }) => {
@@ -143,6 +177,11 @@ const InviteUsers = ({ conversationId }) => {
           <Button variant="primary" onClick={handleInvite}>
             Invite
           </Button>
+          <Button variant="primary" onClick={handleShowLog}>
+            show log
+          </Button>
+
+          
         </Modal.Footer>
       </Modal>
     </>

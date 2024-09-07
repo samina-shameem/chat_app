@@ -26,7 +26,11 @@ const InviteUsers = ({ conversationId }) => {
     setShow(false);
   };
   const handleShow = () => {
-    console.log("Showing invite users modal",conversationId);
+    console.log("Showing invite users modal");
+    console.log("conversationId:",conversationId);
+    console.log("selectedUserIds:",selectedUserIds);
+    console.log("unSelectedUserIds:",unSelectedUserIds);
+    selectedUserIds
     setShow(true);
   };
 

@@ -103,7 +103,7 @@ const Conversations = () => {
             <p className="m-3">Invite a new conversation</p>
           </Col>
           <Col>
-            <InviteUsers conversationId={uuidv4} />
+          {auth.userList && <InviteUsers conversationId={uuidv4()} />}
           </Col>
         </Row>
         <Row>

@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Alert,
   Card,
   Col,
   Container,
+  Form,
   Image,
   Row,
   Spinner,
@@ -14,6 +15,7 @@ import useAuth from "../hooks/useAuth";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import Avatar from "../profile/Avatar"; 
 
+
 const Profile = () => {
   const axiosPrivate = useAxiosPrivate();
   const { auth, logout } = useAuth();
@@ -21,6 +23,13 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [deactivating, setDeactivating] = useState(false);
   const [error, setError] = useState(null);
+  const [updatedData, setUpdatedData] = useState({
+    username: "",
+    password: "",
+    email: "",
+    avatar: "",
+  });
+  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,6 +37,12 @@ const Profile = () => {
       try {
         const response = await axiosPrivate.get("/users/" + auth.userID);
         setProfileData(response.data[0]);
+        setUpdatedData({
+          username: response.data[0].username,
+          password: auth.password,
+          email: response.data[0].email,
+          avatar: response.data[0].avatar,
+        });
       } catch (error) {
         setError("Failed to load profile data");
         console.error(error);
@@ -62,17 +77,37 @@ const Profile = () => {
       }
     };
 
-      const handleEditClick = async () => {
-        try {
-          const response = await axiosPrivate.put("/users/" + auth.userID);
-          setProfileData(response.data[0]);
-        } catch (error) {
-          setError("Failed to load profile data");
-          console.error(error);
-        } finally {
-          setLoading(false);
+    const handleEditClick = async (event) => {
+      event.preventDefault();
+      setIsEditing(true);
+    };
+
+    const handleCancelClick = () => {
+      setIsEditing(false);
+    };
+
+    const handleSaveClick = async (event) => {
+      event.preventDefault();
+      try {
+        const response = await axiosPrivate.put("/user", {
+          userId: auth.userID,
+          updatedData: updatedData,
+        });
+        if (response.status === 200) {
+          const { message } = response.data;
+          await logout();
+          navigate("/login", { state: { message } });
+        } else {
+          setError(response.data);
         }
-      };
+        setIsEditing(false);
+      } catch (error) {
+        setError("Failed to update profile data");
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
   
   
   if (loading) {
@@ -121,11 +156,68 @@ const Profile = () => {
                   <p>Email: {profileData.email}</p>
                 </Col>
                 <Col>
-                  <Row className="m-4">
-                    <Button variant="secondary" onClick={handleEditClick}>
-                      Edit
-                    </Button>
-                  </Row>
+                  {!isEditing ? (
+                    <Row className="m-4">
+                    <Button variant="secondary" onClick={handleEditClick}>Edit</Button>
+                    </Row>
+                  ) : (
+                    <Row className="m-4">
+                      <Form onSubmit={handleSaveClick}>
+                        <Form.Group className="mb-3" controlId="formBasicUsername">
+                          <Form.Label>Username</Form.Label>
+                          <Form.Control
+                            type="text"
+                            placeholder="Enter username"
+                            value={updatedData.username}
+                            onChange={(event) =>
+                              setUpdatedData({
+                                ...updatedData,
+                                username: event.target.value,
+                              })
+                            }
+                          />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="formBasicPassword">
+                          <Form.Label>Password</Form.Label>
+                          <Form.Control
+                            type="password"
+                            placeholder="Enter password"
+                            value={updatedData.password}
+                            onChange={(event) =>
+                              setUpdatedData({
+                                ...updatedData,
+                                password: event.target.value,
+                              })
+                            }
+                          />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="formBasicEmail">
+                          <Form.Label>Email address</Form.Label>
+                          <Form.Control
+                            type="email"
+                            placeholder="Enter email"
+                            value={updatedData.email}
+                            onChange={(event) =>
+                              setUpdatedData({
+                                ...updatedData,
+                                email: event.target.value,
+                              })
+                            }
+                          />
+                        </Form.Group>
+                        <Button variant="primary" type="submit">
+                          Save
+                        </Button>
+                        <Button
+                          className="ms-2"
+                          variant="secondary"
+                          onClick={handleCancelClick}
+                        >
+                          Cancel
+                        </Button>
+                      </Form>
+                    </Row>
+                  )}
                   <Row className="m-4">
                     <Button
                       variant="secondary"
@@ -167,3 +259,4 @@ const Profile = () => {
 };
 
 export default Profile;
+

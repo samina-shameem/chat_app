@@ -9,6 +9,7 @@ import Avatar from "../profile/Avatar";
 import { v4 as uuidv4 } from "uuid";
 import { Container, Row, Col } from "react-bootstrap";
 import InviteUsers from "./InviteUsers";
+import { MdDeleteForever   } from "react-icons/md";
 
 const ConversationItem = ({ conversationId, status, refreshRate }) => {
   const axiosPrivate = useAxiosPrivate();
@@ -20,25 +21,25 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
   const [refresh, setRefresh] = useState(false);
 
   const effectiveConversationId = conversationId || uuidv4();
-  console.info("********************************************"); 
+  console.info("********************************************");
   console.log(effectiveConversationId);
-  console.log(messages)
-  console.log(conversationId)
-  console.info("********************************************"); 
-  const fetchMessages = async () => {   
+  console.log(messages);
+  console.log(conversationId);
+  console.info("********************************************");
+  const fetchMessages = async () => {
     if (!axiosPrivate) {
       console.error("axiosPrivate is null");
       return;
     }
-    console.info("===================================="); 
-    console.info(conversationId); 
-    console.info(status); 
+    console.info("====================================");
+    console.info(conversationId);
+    console.info(status);
     console.info(effectiveConversationId);
     console.info(messages);
-    console.info("===================================="); 
+    console.info("====================================");
     if (!effectiveConversationId) {
-      console.info("Empty conversationId",status);  
-      setMessages([]);          
+      console.info("Empty conversationId", status);
+      setMessages([]);
       return;
     }
     try {
@@ -93,6 +94,15 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
     }
   };
 
+  const handleDeleteMessage = async (messageId) => {
+    try {
+      await axiosPrivate.delete(`/messages/${messageId}`);
+      fetchMessages(); // Refresh the message list after deleting
+    } catch (err) {
+      console.error("Error deleting message", err);
+    }
+  };
+
   const handleRefreshClick = () => {
     setRefresh((prevRefresh) => !prevRefresh);
   };
@@ -141,61 +151,70 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
         {messages.length > 0 ? (
           messages.map((message) => {
             const isCurrentUsersMessage = message?.userId === auth?.userID;
-            return (
-              isCurrentUsersMessage ? (
-                <Container key={message?.id} className="d-flex justify-content-start">
-                  <Row>
-                    <Col>
-                      {renderAvatar(message?.userId)}
-                    </Col>
-                    <Col>
-                      <Badge
-                        style={{             
-                          minWidth: "75px", 
-                          minHeight: "50px", 
-                          display: "flex", 
-                          alignItems: "center", 
-                          justifyContent: "center",                                                    
-                        }}
-                        bg="primary"                        
-                        pill
-                      >
-                        {message?.text || "(empty message)"}
-                      </Badge>
-                    </Col>
-                  </Row>
-                </Container>
-              ) : (
-                <Container key={message?.id} className="d-flex justify-content-end">
-                  <Row>
-                    <Col>
-                      <Badge
-                        style={{ 
-                          minWidth: "75px", 
-                          minHeight: "50px", 
-                          display: "flex", 
-                          alignItems: "center", 
-                          justifyContent: "center" 
-                        }}
-                        bg="secondary"
-                        pill
-                      >
-                        {message?.text || "(empty message)"}
-                      </Badge>
-                    </Col>
-                    <Col >
-                      {renderAvatar(message?.userId)}
-                    </Col>
-                  </Row>
-                </Container>
-              )
+            return isCurrentUsersMessage ? (
+              <Container
+                key={message?.id}
+                className="d-flex justify-content-start"
+              >
+                <Row>
+                  <Col>{renderAvatar(message?.userId)}</Col>
+                  <Col>
+                    <Badge
+                      style={{
+                        minWidth: "75px",
+                        minHeight: "50px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                      bg="primary"
+                      pill
+                    >
+                      {message?.text || "(empty message)"}
+                    </Badge>
+                  </Col>
+                  <Col>
+                    <Button
+                      variant="danger"
+                      className="m-1 p-1"
+                      onClick={() => handleDeleteMessage(message.id)}
+                    >
+                      <MdDeleteForever />
+                    </Button>
+                  </Col>
+                </Row>
+              </Container>
+            ) : (
+              <Container
+                key={message?.id}
+                className="d-flex justify-content-end"
+              >
+                <Row>
+                  <Col>
+                    <Badge
+                      style={{
+                        minWidth: "75px",
+                        minHeight: "50px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                      bg="secondary"
+                      pill
+                    >
+                      {message?.text || "(empty message)"}
+                    </Badge>
+                  </Col>
+                  <Col>{renderAvatar(message?.userId)}</Col>
+                </Row>
+              </Container>
             );
           })
         ) : (
           <p className="mt-3">No messages to display</p>
         )}
         <Form className="mt-3 d-flex">
-          <InviteUsers conversationId={effectiveConversationId}/>
+          <InviteUsers conversationId={effectiveConversationId} />
           <Form.Control
             type="text"
             placeholder="Type a message..."
@@ -223,5 +242,3 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
 };
 
 export default ConversationItem;
-
-

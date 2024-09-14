@@ -9,7 +9,7 @@ import Avatar from "../profile/Avatar";
 import { v4 as uuidv4 } from "uuid";
 import { Container, Row, Col } from "react-bootstrap";
 import InviteUsers from "./InviteUsers";
-import { MdDeleteForever   } from "react-icons/md";
+import { MdDeleteForever } from "react-icons/md";
 
 const ConversationItem = ({ conversationId, status, refreshRate }) => {
   const axiosPrivate = useAxiosPrivate();
@@ -19,26 +19,13 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
   const [participants, setParticipants] = useState(new Set());
   const [isActive, setIsActive] = useState(false);
   const [refresh, setRefresh] = useState(false);
+  const [deletingMessages, setDeletingMessages] = useState([]); // To track deleted messages
 
   const effectiveConversationId = conversationId || uuidv4();
-  console.info("********************************************");
-  console.log(effectiveConversationId);
-  console.log(messages);
-  console.log(conversationId);
-  console.info("********************************************");
+
   const fetchMessages = async () => {
-    if (!axiosPrivate) {
-      console.error("axiosPrivate is null");
-      return;
-    }
-    console.info("====================================");
-    console.info(conversationId);
-    console.info(status);
-    console.info(effectiveConversationId);
-    console.info(messages);
-    console.info("====================================");
+    if (!axiosPrivate) return;
     if (!effectiveConversationId) {
-      console.info("Empty conversationId", status);
       setMessages([]);
       return;
     }
@@ -46,9 +33,7 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
       const response = await axiosPrivate.get(
         `/messages?conversationId=${effectiveConversationId}`
       );
-
-      if (!response || !response.data) {
-        console.error("No response or data from message fetch");
+      if (!response?.data) {
         setMessages([]);
         setParticipants([]);
         return;
@@ -63,11 +48,9 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
       uniqueParticipants.delete(auth.userID);
       setParticipants(uniqueParticipants);
       setMessages(sortedMessages);
+      setDeletingMessages([]); // Reset deleted messages after fetching
     } catch (err) {
-      console.error(
-        `Error fetching messages for conversation ${effectiveConversationId}`,
-        err
-      );
+      console.error(`Error fetching messages`, err);
       setMessages([]);
       setParticipants([]);
     }
@@ -95,6 +78,7 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
   };
 
   const handleDeleteMessage = async (messageId) => {
+    setDeletingMessages((prev) => [...prev, messageId]); // Add message ID to deletingMessages
     try {
       await axiosPrivate.delete(`/messages/${messageId}`);
       fetchMessages(); // Refresh the message list after deleting
@@ -151,6 +135,8 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
         {messages.length > 0 ? (
           messages.map((message) => {
             const isCurrentUsersMessage = message?.userId === auth?.userID;
+            const isDeleting = deletingMessages.includes(message.id); // Check if the message is being deleted
+
             return isCurrentUsersMessage ? (
               <Container
                 key={message?.id}
@@ -166,6 +152,7 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
+                        textDecoration: isDeleting ? "line-through" : "none", // Strike out if deleting
                       }}
                       bg="primary"
                       pill
@@ -178,6 +165,7 @@ const ConversationItem = ({ conversationId, status, refreshRate }) => {
                       variant="danger"
                       className="m-1 p-1"
                       onClick={() => handleDeleteMessage(message.id)}
+                      disabled={isDeleting} // Disable the delete button if deleting
                     >
                       <MdDeleteForever />
                     </Button>

@@ -57,7 +57,7 @@ After ensuring the API works as expected, it's time to create a React app that i
 - [x] All other messages should be displayed on the left side.
 - [x] The user should be able to create new messages.
   - [TODO] Sanitize the content in some way.
-- [TODO] The user should be able to delete existing messages.
+- [x] The user should be able to delete existing messages.
 
 **SideNav.jsx:**
 - [x] Display via a side navigation, see this example: https://t.ly/PFbQq.
@@ -94,7 +94,7 @@ After ensuring the API works as expected, it's time to create a React app that i
 - [x] The user should be able to update their username, email, and avatar*.
 - [x] The user should be able to delete their account and receive clear feedback/warnings about what they are attempting to do. Upon successful deletion, the user should be logged out and redirected to Login.jsx.
 
-*If the avatar is changed, a preview should be shown after the new URL is entered (can be after a button press or debounced in the input field) OR the user can take their own picture, see https://www.npmjs.com/package/react-webcam, and the image should be hosted somewhere – use a service with an API, e.g., https://freeimage.host/page/api?lang=en, and then the URL should be updated in the avatar column in the database.
+[Todo] *If the avatar is changed, a preview should be shown after the new URL is entered (can be after a button press or debounced in the input field) OR the user can take their own picture, see https://www.npmjs.com/package/react-webcam, and the image should be hosted somewhere – use a service with an API, e.g., https://freeimage.host/page/api?lang=en, and then the URL should be updated in the avatar column in the database.
 
 Let me know if you have any questions or concerns.  
 Don't forget the deadline and to read the instructions carefully to avoid missing anything.  
